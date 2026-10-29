@@ -1,0 +1,14 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');const vm=require('node:vm');
+const html=fs.readFileSync(require('node:path').join(__dirname,'../painel/index.html'),'utf8');
+const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{value:'',files:[],replaceChildren(){},append(){},reset(){},focus(){}});return nodes.get(id)};
+const context=vm.createContext({URL,document:{getElementById:node},window:{addEventListener(){}},console});
+vm.runInContext(script,context);
+const validate=x=>context.validate(x);
+const good={name:'Computador',url:'https://example.org/mcp',auth:'oauth',env:'personal'};
+test('accept HTTPS and loopback HTTP',()=>{assert.equal(validate(good).name,'Computador');assert.equal(validate({...good,url:'http://127.0.0.1:3000/mcp'}).auth,'oauth')});
+test('reject remote HTTP, credential URLs and executable schemes',()=>{for(const url of ['http://example.org','https://user:pass@example.org','https://example.org?token=x','https://example.org#key','javascript:alert(1)','file:///etc/passwd'])assert.throws(()=>validate({...good,url}))});
+test('reject malformed imported profiles',()=>{for(const p of [null,{}, {...good,name:''},{...good,auth:'unknown'},{...good,env:'unknown'},{...good,name:'a'.repeat(81)}])assert.throws(()=>validate(p))});
+test('normalize with allowlist, discard unknown fields',()=>{const p=validate({...good,name:'  Casa  ',token:'secret',__proto__:{admin:true}});assert.equal(p.name,'Casa');assert.equal(p.token,undefined);assert.equal(p.admin,undefined)});

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "codex-native2",
+  "version": "0.4.0",
+  "description": "Assistente local de instalação, perfis e diagnóstico do Codex Web GPT. Configure seu próprio túnel MCP.",
+  "keywords": [
+    "codex",
+    "mcp",
+    "windows",
+    "diagnostico",
+    "chatgpt"
+  ],
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/setup/SKILL.md",
+      "interface": {
+        "displayName": "Codex Native2",
+        "shortDescription": "Configuração e diagnóstico",
+        "longDescription": "Orienta a configuração, diagnostica resultados de testes locais e ajuda a vincular o Codex Web GPT ao ChatGPT. Esta versão não instala nem disponibiliza servidor MCP: ferramentas locais só funcionarão após uma conexão MCP real e autorizada.",
+        "developerName": "Murillo Tonon",
+        "category": "Productivity",
+        "defaultPrompt": [
+          "Configure o Codex Native2 e mostre como validar o Codex Web GPT.",
+          "Analise o diagnóstico do meu Codex Web GPT e indique o próximo teste seguro."
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Codex Native2 · Conexões</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;background:#0c1321;color:#e9eef7}*{box-sizing:border-box}body{max-width:1080px;margin:auto;padding:30px}header{display:flex;align-items:center;justify-content:space-between}h1{margin-bottom:5px}p{line-height:1.6;color:#b4c3da}.badge{background:#183c37;color:#83e6c0;padding:8px 14px;border-radius:30px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}section{background:#141f32;border:1px solid #2a3951;border-radius:18px;padding:24px;margin-top:22px}label{display:block;margin:16px 0 6px}input,select,button{font:inherit;border-radius:8px;padding:12px;border:1px solid #41516c}input,select{width:100%;background:#0b1424;color:#fff}button{background:#8ce4cd;color:#09251f;cursor:pointer;margin:12px 6px 0 0}button.secondary{background:#25354d;color:#fff}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #d1b9ff}article{border-top:1px solid #34435b;padding:18px 0;overflow-wrap:anywhere}article h3{margin:0}small{color:#a9b9d0}#notice{min-height:30px;color:#a0eed6}#empty{padding:20px 0}footer{margin-top:24px} @media(max-width:720px){.grid{grid-template-columns:1fr}body{padding:16px}header{display:block}}
+</style>
+<header><div><h1>Codex Native2</h1><p>Central de conexões · v0.4.0</p></div><span class="badge">Painel local</span></header>
+<section><strong>Prepare suas conexões</strong><p>Cadastre os endereços e organize seus perfis. Este painel não registra servidores no ChatGPT e não realiza chamadas MCP. A autenticação deve ser feita no fluxo oficial do serviço.</p><small>Não informe senhas, tokens ou chaves. Os perfis ficam apenas na memória desta página até você exportar. Ao fechar ou recarregar, dados não exportados serão perdidos. No Windows, ao exportar, escolha a pasta dados da instalação; o navegador pode usar Downloads por padrão.</small></section>
+<div class="grid"><section><h2 id="heading">Nova conexão</h2>
+<form id="form">
+<label for="name">Nome da conexão</label><input id="name" required maxlength="80" placeholder="Meu computador">
+<label for="url">Endereço do servidor MCP</label><input id="url" type="url" required maxlength="2048" placeholder="https://seu-servidor/mcp">
+<label for="auth">Método de autenticação previsto</label><select id="auth"><option value="oauth">OAuth — entrar pelo serviço</option><option value="api_key">Chave de API — configurar no host</option><option value="none">Sem autenticação</option></select>
+<label for="env">Ambiente</label><select id="env"><option value="personal">Pessoal</option><option value="test">Homologação</option><option value="production">Produção</option></select>
+<button type="submit">Salvar perfil</button><button type="button" id="cancel" class="secondary" hidden>Cancelar edição</button>
+</form><p id="notice" role="status" aria-live="polite"></p></section>
+<section><h2>Minhas conexões</h2><p id="empty">Nenhuma conexão cadastrada.</p><div id="list"></div>
+<button id="export" class="secondary">Exportar perfis</button><button id="import" class="secondary">Importar perfis</button><input id="file" type="file" accept=".json,application/json" hidden>
+<p><small>A exportação contém somente os campos deste formulário. Importar adiciona perfis e não substitui os existentes.</small></p></section></div>
+<footer><p>Próxima etapa para cada perfil: registrar e autorizar o servidor no host, listar ferramentas e executar uma chamada real. O proxy local 17841 não comprova um endpoint MCP.</p></footer>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);let profiles=[],editing=null,sequence=0;
+function validate(raw){
+ if(!raw||typeof raw!=='object'||typeof raw.name!=='string'||!raw.name.trim()||raw.name.length>80||typeof raw.url!=='string'||raw.url.length>2048)throw Error('Nome ou endereço inválido.');
+ let u;try{u=new URL(raw.url)}catch{throw Error('Informe um endereço válido.')}
+ const local=['localhost','127.0.0.1','[::1]'].includes(u.hostname);
+ if(u.protocol!=='https:'&&!(local&&u.protocol==='http:'))throw Error('Use HTTPS; HTTP é aceito apenas no endereço local.');
+ if(u.username||u.password||u.search||u.hash)throw Error('Não inclua credenciais, parâmetros ou fragmentos no endereço.');
+ if(!['oauth','api_key','none'].includes(raw.auth)||!['personal','test','production'].includes(raw.env))throw Error('Método de autenticação ou ambiente inválido.');
+ return {name:raw.name.trim(),url:u.href,auth:raw.auth,env:raw.env};
+}
+function message(s){$('notice').textContent=s}
+function reset(){editing=null;$('form').reset();$('heading').textContent='Nova conexão';$('cancel').hidden=true}
+function button(label,action){const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent=label;b.onclick=action;return b}
+function render(){
+ $('list').replaceChildren();$('empty').hidden=profiles.length>0;
+ profiles.forEach(p=>{
+ const a=document.createElement('article'),h=document.createElement('h3'),d=document.createElement('p'),s=document.createElement('small');
+ h.textContent=p.name;d.textContent=p.url;s.textContent=({personal:'Pessoal',test:'Homologação',production:'Produção'})[p.env]+' · '+p.auth+' · MCP não verificado';
+ a.append(h,d,s,document.createElement('br'));
+ a.append(button('Editar',()=>{editing=p.id;for(const key of ['name','url','auth','env'])$(key).value=p[key];$('heading').textContent='Editar conexão';$('cancel').hidden=false;$('name').focus()}));
+ a.append(button('Validar endereço',()=>{try{validate(p);message('Formato do endereço válido. Conectividade, autenticação e MCP não foram testados.')}catch(e){message(e.message)}}));
+ a.append(button('Remover',()=>{if(confirm('Remover o perfil “'+p.name+'”?')){profiles=profiles.filter(x=>x.id!==p.id);if(editing===p.id)reset();render();message('Perfil removido.')}}));
+ $('list').append(a);
+ });
+}
+$('form').onsubmit=e=>{e.preventDefault();try{const p=validate(Object.fromEntries(['name','url','auth','env'].map(k=>[k,$(k).value])));if(editing!==null){profiles=profiles.map(x=>x.id===editing?{...p,id:editing}:x)}else{if(profiles.length>=100)throw Error('Limite de 100 perfis.');profiles.push({...p,id:++sequence})}reset();render();message('Perfil salvo nesta página. Exporte para guardar.')}catch(e){message(e.message)}};
+$('cancel').onclick=reset;
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify({format:'codex-native2-profiles',version:1,connections:profiles.map(({id,...p})=>p)},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='codex-native2-conexoes.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);message('Perfis exportados sem credenciais.')};
+$('import').onclick=()=>$('file').click();
+$('file').onchange=async()=>{try{const f=$('file').files[0];if(!f)return;if(f.size>262144)throw Error('Arquivo excede 256 KB.');const data=JSON.parse(await f.text());if(data.format!=='codex-native2-profiles'||data.version!==1||!Array.isArray(data.connections))throw Error('Formato de arquivo não reconhecido.');if(data.connections.length+profiles.length>100)throw Error('Limite de 100 perfis.');const incoming=data.connections.map(validate);profiles.push(...incoming.map(p=>({...p,id:++sequence})));render();message(incoming.length+' perfil(is) importado(s).')}catch(e){message(e.message)}finally{$('file').value=''}};
+window.addEventListener('beforeunload',e=>{if(profiles.length){e.preventDefault();e.returnValue=''}});
+</script></html>

@@ -1,0 +1,9 @@
+dados/
+logs/
+dist/
+releases/
+__pycache__/
+*.zip
+*.log
+.env*
+mcp.json
