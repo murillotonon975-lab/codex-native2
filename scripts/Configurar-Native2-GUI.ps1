@@ -160,6 +160,11 @@ $diagnose.Text = 'Diagnosticar'
 $diagnose.SetBounds(469, 179, 130, 36)
 $form.Controls.Add($diagnose)
 
+$integrations = New-Object System.Windows.Forms.Button
+$integrations.Text = 'Integracoes'
+$integrations.SetBounds(609, 179, 130, 36)
+$form.Controls.Add($integrations)
+
 $settingsInfo = New-Object System.Windows.Forms.Label
 $settingsInfo.Text = 'O perfil local nao altera automaticamente o tunel do launcher nem o conector ChatGPT. Para aplicar uma troca, use os fluxos MCP oficiais do Codex Web GPT e depois Verify runtime.'
 $settingsInfo.SetBounds(24, 228, 716, 62)
@@ -197,4 +202,17 @@ $save.Add_Click({
     } catch { [System.Windows.Forms.MessageBox]::Show($_.Exception.Message,'Codex Native2') | Out-Null }
 })
 $diagnose.Add_Click({ $log.Text = Get-SafeDiagnostics })
+$integrations.Add_Click({
+    $node = Get-Command node.exe -ErrorAction SilentlyContinue
+    $script = Join-Path $PSScriptRoot 'Inventariar-Integracoes.mjs'
+    if ($null -eq $node -or -not (Test-Path -LiteralPath $script)) {
+        $log.Text = 'Inventario indisponivel: Node.js ou script ausente. Use Diagnosticar sem alterar configuracoes.'
+    } else {
+        try {
+            $log.Text = (& $node.Source $script 2>&1 | Out-String)
+        } catch {
+            $log.Text = 'Falha ao consultar catalogo local. Nenhuma configuracao foi alterada.'
+        }
+    }
+})
 [void]$form.ShowDialog()
