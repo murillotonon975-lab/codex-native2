@@ -88,3 +88,14 @@ Codex Native2 (versão única no GitHub)
 - [ ] ZIP público não contém túnel, chaves ou arquivos pessoais.
 - [ ] Pipeline CI/testes de instalação e segurança são aprovados.
 - [ ] Documentação não descreve “configurado” como “conectado” sem evidência.
+
+## Compartilhamento de ferramentas em dois ambientes
+
+O mesmo plugin deve oferecer uma interface de descoberta para **MCPs e ferramentas locais** e **plugins internos/conectados do ChatGPT**. Cada item inclui sua origem, disponibilidade **na tarefa atual**, escopo de acesso e última chamada real. Não duplicar ou importar credenciais de uma origem para a outra.
+
+- **Codex CLI/Windows**: `codex mcp list --json` descobre servidores configurados; `tools/list` do runtime confirma seis ferramentas de entrada. O inventário de ferramentas do Codex usa `codex_tool_inventory` com `turn_token` da tarefa corrente. Comandos locais não são executados durante o inventário.
+- **ChatGPT**: o host disponibiliza plugins e ferramentas numa sessão autorizada. Esses recursos podem ser utilizados pelo assistente **quando realmente presentes**; não são automaticamente exportáveis ao Windows, nem o plugin pode prometer acesso a funcionalidades internas que o host não anunciou.
+- **Apps comuns instalados**: exigem adaptadores, APIs ou ferramentas MCP próprias, mesmo se disponíveis no sistema operacional.
+- **Roteamento**: preferir a ferramenta correspondente à ação desejada, respeitar autorização para cada chamada; opcionalmente usar Remote Desktop Commander como contingência se Native2 não estiver disponível, e vice-versa, sem duplicar efeitos colaterais.
+
+Implementação inicial nesta PR: inventário local com identificação de origem, menu Windows, janela de configuração e skill de uso de ferramentas do host. **Fase seguinte (ainda não implementada)**: descoberta efetiva dos plugins do ChatGPT diretamente pelo host, sincronização controlada da visualização, comandos de ligação MCP e prova de execução nos dois ambientes. Ver [catálogo de ferramentas](CATALOGO-FERRAMENTAS.md).
