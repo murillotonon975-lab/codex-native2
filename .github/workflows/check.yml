@@ -14,8 +14,9 @@ jobs:
         with:
           python-version: '3.12'
       - run: python scripts/validate.py
-      - run: node --test tests/profiles.test.cjs
+      - run: node --test tests/profiles.test.cjs tests/mcp-probe.test.mjs tests/inventory-integrations.test.mjs
       - run: python scripts/package.py
+      - run: python tests/check_package_assets.py
   powershell:
     runs-on: windows-latest
     steps:
@@ -29,3 +30,7 @@ jobs:
             if ($errors.Count) { $errors | Write-Output; $failed = $true }
           }
           if ($failed) { exit 1 }
+      - shell: powershell
+        run: |
+          & ./scripts/Configurar-Native2-GUI.ps1 -CheckOnly
+          if ($LASTEXITCODE -ne 0) { exit 1 }
