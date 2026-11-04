@@ -3,7 +3,7 @@ import json,re
 root=Path(__file__).resolve().parents[1]
 p=json.loads((root/'plugin.json').read_text(encoding='utf-8-sig'))
 assert p['name']=='codex-native2' and re.fullmatch(r'\d+\.\d+\.\d+',p['version'])
-for name in ['Iniciar.cmd','Configurar-Conexao.ps1','Instalar-Native2.ps1','README.md','painel/index.html','scripts/Verificar-Catalogo-MCP.mjs','tests/mcp-probe.test.mjs','tests/fixtures/mock-mcp.cjs','scripts/Inventariar-Integracoes.mjs','tests/inventory-integrations.test.mjs','Inventariar-Integracoes.cmd']:
+for name in ['Iniciar.cmd','Configurar-Conexao.ps1','Instalar-Native2.ps1','README.md','painel/index.html','scripts/Verificar-Catalogo-MCP.mjs','tests/mcp-probe.test.mjs','tests/fixtures/mock-mcp.cjs','scripts/Inventariar-Integracoes.mjs','tests/inventory-integrations.test.mjs','scripts/Relatorio-Falhas-GitHub.mjs','tests/failure-report.test.mjs','Inventariar-Integracoes.cmd']:
     assert (root/name).is_file(),name
 assert not (root/'mcp.json').exists(),'Public source must not contain account binding'
 for path in root.rglob('*'):

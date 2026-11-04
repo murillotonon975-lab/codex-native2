@@ -112,9 +112,9 @@ Add-Type -AssemblyName System.Drawing
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = 'Codex Native2 | Configuracao'
-$form.ClientSize = New-Object System.Drawing.Size(770, 570)
+$form.ClientSize = New-Object System.Drawing.Size(770, 640)
 $form.StartPosition = 'CenterScreen'
-$form.MinimumSize = New-Object System.Drawing.Size(780, 610)
+$form.MinimumSize = New-Object System.Drawing.Size(780, 680)
 $form.Font = New-Object System.Drawing.Font('Segoe UI', 10)
 
 $title = New-Object System.Windows.Forms.Label
@@ -165,9 +165,24 @@ $integrations.Text = 'Integracoes'
 $integrations.SetBounds(609, 179, 130, 36)
 $form.Controls.Add($integrations)
 
+$reportPreview = New-Object System.Windows.Forms.Button
+$reportPreview.Text = 'Previa de falha'
+$reportPreview.SetBounds(24, 232, 198, 36)
+$form.Controls.Add($reportPreview)
+
+$reportPublish = New-Object System.Windows.Forms.Button
+$reportPublish.Text = 'Enviar Issue no GitHub'
+$reportPublish.SetBounds(242, 232, 220, 36)
+$form.Controls.Add($reportPublish)
+
+$reportDelete = New-Object System.Windows.Forms.Button
+$reportDelete.Text = 'Apagar Issue corrigida'
+$reportDelete.SetBounds(480, 232, 259, 36)
+$form.Controls.Add($reportDelete)
+
 $settingsInfo = New-Object System.Windows.Forms.Label
-$settingsInfo.Text = 'O perfil local nao altera automaticamente o tunel do launcher nem o conector ChatGPT. Para aplicar uma troca, use os fluxos MCP oficiais do Codex Web GPT e depois Verify runtime.'
-$settingsInfo.SetBounds(24, 228, 716, 62)
+$settingsInfo.Text = 'O perfil local nao altera automaticamente o tunel do launcher nem o conector ChatGPT. Publicar envia somente um resumo sanitizado ao GitHub. Apagar exige comprovacao de correcao e confirmacao.'
+$settingsInfo.SetBounds(24, 280, 716, 62)
 $form.Controls.Add($settingsInfo)
 
 $log = New-Object System.Windows.Forms.TextBox
@@ -175,13 +190,13 @@ $log.Multiline = $true
 $log.ReadOnly = $true
 $log.ScrollBars = 'Vertical'
 $log.Font = New-Object System.Drawing.Font('Consolas', 9)
-$log.SetBounds(24, 298, 715, 204)
+$log.SetBounds(24, 350, 715, 200)
 $form.Controls.Add($log)
 $log.Text = Get-SafeDiagnostics
 
 $bottom = New-Object System.Windows.Forms.Label
 $bottom.Text = 'Segredos nao sao armazenados. Troca do tunel no ChatGPT exige permissao e conexao real do host.'
-$bottom.SetBounds(24, 517, 716, 35)
+$bottom.SetBounds(24, 570, 716, 40)
 $form.Controls.Add($bottom)
 
 $detect.Add_Click({
@@ -213,6 +228,89 @@ $integrations.Add_Click({
         } catch {
             $log.Text = 'Falha ao consultar catalogo local. Nenhuma configuracao foi alterada.'
         }
+    }
+})
+$reportPreview.Add_Click({
+    $node = Get-Command node.exe -ErrorAction SilentlyContinue
+    $script = Join-Path $PSScriptRoot 'Relatorio-Falhas-GitHub.mjs'
+    if ($null -eq $node -or -not (Test-Path -LiteralPath $script)) {
+        $log.Text = 'Gerador de relatorios indisponivel: Node.js ou script ausente.'
+    } else {
+        try {
+            $json = (& $node.Source $script --json 2>&1 | Out-String)
+            if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel gerar o relatorio.' }
+            $issue = $json | ConvertFrom-Json
+            $log.Text = $issue.title + [Environment]::NewLine + $issue.body + [Environment]::NewLine +
+                'PREVIA LOCAL. Nada foi enviado ao GitHub.'
+        } catch {
+            $log.Text = 'Erro na previa. Nenhuma informacao foi enviada ao GitHub.'
+        }
+    }
+})
+$reportPublish.Add_Click({
+    $node = Get-Command node.exe -ErrorAction SilentlyContinue
+    $script = Join-Path $PSScriptRoot 'Relatorio-Falhas-GitHub.mjs'
+    if ($null -eq $node -or -not (Test-Path -LiteralPath $script)) {
+        $log.Text = 'Gerador de relatorios indisponivel: Node.js ou script ausente.'
+        return
+    }
+    try {
+        $preview = (& $node.Source $script --json 2>&1 | Out-String)
+        if ($LASTEXITCODE -ne 0) { throw 'Previa indisponivel.' }
+        $issue = $preview | ConvertFrom-Json
+        $question = 'Publicar esta Issue de diagnostico no repositorio PUBLICO do GitHub?' +
+            [Environment]::NewLine + 'O conteudo sera somente o resumo sanitizado abaixo:' +
+            [Environment]::NewLine + [Environment]::NewLine + $issue.body
+        $choice = [System.Windows.Forms.MessageBox]::Show(
+            $question,'Codex Native2 | Publicar relatorio',
+            [System.Windows.Forms.MessageBoxButtons]::YesNo,
+            [System.Windows.Forms.MessageBoxIcon]::Warning)
+        if ($choice -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+        $result = (& $node.Source $script --publish --confirm-publish 2>&1 | Out-String)
+        if ($LASTEXITCODE -ne 0) { throw 'Publicacao nao confirmada. Verifique a autenticacao do GitHub.' }
+        $published = $result | ConvertFrom-Json
+        if ($published.status -ne 'published') { throw 'GitHub nao confirmou a publicacao.' }
+        $log.Text = 'Relatorio publicado no GitHub:' + [Environment]::NewLine + $published.url +
+            [Environment]::NewLine + 'Nao apagar ate a validacao REAL do Codex Native2 no ChatGPT.'
+    } catch {
+        $log.Text = 'Nao foi possivel confirmar a publicacao do relatorio. Confira o GitHub.'
+    }
+})
+$reportDelete.Add_Click({
+    $node = Get-Command node.exe -ErrorAction SilentlyContinue
+    $script = Join-Path $PSScriptRoot 'Relatorio-Falhas-GitHub.mjs'
+    if ($null -eq $node -or -not (Test-Path -LiteralPath $script)) {
+        $log.Text = 'Gerador de relatorios indisponivel.'
+        return
+    }
+    Add-Type -AssemblyName Microsoft.VisualBasic
+    $issueNumber = [Microsoft.VisualBasic.Interaction]::InputBox(
+        'Numero da Issue de diagnostico confirmadamente corrigida:',
+        'Codex Native2 | Limpeza no GitHub','')
+    if (-not ($issueNumber -cmatch '^[1-9][0-9]{0,8}$')) {
+        $log.Text = 'Numero invalido ou operacao cancelada.'
+        return
+    }
+    $selector = New-Object System.Windows.Forms.OpenFileDialog
+    $selector.Filter = 'Comprovante JSON (*.json)|*.json'
+    $selector.Title = 'Selecione a evidencia dos testes remotos aprovados'
+    if ($selector.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { return }
+    $question = 'A Issue sera EXCLUIDA no GitHub. Confirmou no ChatGPT que o workspace, ' +
+        'codex_tool_inventory e uma chamada nativa de leitura passaram? ' +
+        'Esta acao e irreversivel e exige prova recente.'
+    $choice = [System.Windows.Forms.MessageBox]::Show(
+        $question,'Codex Native2 | Excluir Issue',
+        [System.Windows.Forms.MessageBoxButtons]::YesNo,
+        [System.Windows.Forms.MessageBoxIcon]::Warning)
+    if ($choice -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+    try {
+        $result = (& $node.Source $script --delete $issueNumber --proof $selector.FileName --confirm-delete 2>&1 | Out-String)
+        if ($LASTEXITCODE -ne 0) { throw 'Exclusao nao confirmada.' }
+        $deleted = $result | ConvertFrom-Json
+        if ($deleted.status -ne 'deleted_on_github') { throw 'GitHub nao confirmou exclusao.' }
+        $log.Text = 'Issue de diagnostico ' + $issueNumber + ' excluida do GitHub. Logs locais preservados.'
+    } catch {
+        $log.Text = 'Exclusao nao comprovada ou requisitos de validacao nao cumpridos. Issue preservada.'
     }
 })
 [void]$form.ShowDialog()

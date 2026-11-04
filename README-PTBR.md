@@ -37,6 +37,12 @@ Perfis ficam na memória até exportar; fechar a página perde alterações. Imp
 
 Instale uma nova versão no mesmo destino. Cada execução usa uma pasta exclusiva em `releases`; versões e perfis anteriores permanecem intactos. Exporte os perfis da versão antiga e importe na nova. Para voltar, execute `Iniciar.cmd` na pasta anterior. Não existe atualização silenciosa nem migração automática de dados.
 
+## Relatorio de falhas no GitHub
+
+No painel Windows, utilize **Previa de falha** para consultar um resumo sanitizado e **Enviar Issue no GitHub** para registrar o problema com confirmacao. O relatorio inclui somente contagens, estado do MCP local e codigos de falha, nunca caminhos completos, tokens ou logs originais. O GitHub e publico.
+
+Quando a correcao for **comprovada** por um rollout valido, pelo inventario real `codex_tool_inventory` no ChatGPT e por uma chamada nativa de leitura aprovada, utilize **Apagar Issue corrigida** para excluir o relatorio no GitHub. O painel exige uma atestacao recente dos testes e confirmacao expressa. Logs originais do computador permanecem intocados. Consulte [docs/RELATORIOS-DE-FALHAS.md](docs/RELATORIOS-DE-FALHAS.md) para o procedimento e as limitacoes de verificacao.
+
 ## Diagnóstico
 
 - **ENOSPC:** libere espaço na unidade do perfil Windows e dos temporários. Instalar o painel em D: não move Codex Web GPT de C:.
