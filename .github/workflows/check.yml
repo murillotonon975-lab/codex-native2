@@ -16,6 +16,7 @@ jobs:
       - run: python scripts/validate.py
       - run: node --test tests/profiles.test.cjs tests/mcp-probe.test.mjs tests/inventory-integrations.test.mjs
       - run: python scripts/package.py
+      - run: python tests/check_package_assets.py
   powershell:
     runs-on: windows-latest
     steps:
