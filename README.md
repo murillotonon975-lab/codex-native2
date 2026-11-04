@@ -19,6 +19,9 @@ O menu oferece painel de perfis, configuração do túnel, diagnóstico e este g
 
 ## Conectar ao ChatGPT
 
+**Novo:** execute `Vincular-ChatGPT.cmd` (menu 7) para consultar a prontidao local e siga **ChatGPT web > Plugins > + > Adicionar servidor MCP personalizado > Tunel**. Revise as seis ferramentas anunciadas antes de criar e habilitar o conector; valide `codex_tool_inventory` e uma chamada inofensiva com `codex_exec` em uma nova conversa. O ZIP pessoal de `Configurar-Conexao.cmd` e um caminho legado e nao vincula automaticamente o host. Veja o passo a passo em [README-PTBR.md](README-PTBR.md). Não substitua o plugin atual 0.5.x por um ZIP antigo 0.4.x.
+
+
 Pré-requisito: Codex Web GPT instalado separadamente, modo `full` e túnel ativo na sua conta. Use o fluxo mostrado pelo launcher para criar o túnel e registrar o conector. Recursos e permissões disponíveis dependem da conta e do host.
 
 1. No menu, escolha **Configurar meu túnel**.
