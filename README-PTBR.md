@@ -1,6 +1,6 @@
 # Codex Native2
 
-Assistente comunitário para configurar e diagnosticar a integração entre Codex Web GPT e ChatGPT no Windows. **0.4.0 BETA.** Não é um produto oficial da OpenAI e não distribui o launcher, o Codex CLI nem um servidor MCP próprio.
+Assistente comunitário para configurar e diagnosticar a integração entre Codex Web GPT e ChatGPT no Windows. **0.4.1 BETA.** Não é um produto oficial da OpenAI e não distribui o launcher, o Codex CLI nem um servidor MCP próprio.
 
 [Baixar código e instalador (ZIP)](https://github.com/murillotonon975-lab/codex-native2/archive/refs/heads/main.zip) · [Ver arquivos](https://github.com/murillotonon975-lab/codex-native2)
 
