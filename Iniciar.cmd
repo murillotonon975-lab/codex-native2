@@ -10,11 +10,13 @@ echo 3. Gerar pacote de conexao por usuario (modo legado)
 echo 4. Diagnosticar conexao (somente leitura)
 echo 5. Inventariar MCPs e ferramentas do computador (somente leitura)
 echo 6. Verificar 6 ferramentas nativas do runtime (somente leitura)
-echo 7. Ler guia de instalacao
-echo 8. Sair
-choice /c 12345678 /n /m "Escolha: "
-if errorlevel 8 exit /b 0
-if errorlevel 7 (start "" notepad.exe "%~dp0README-PTBR.md" & goto menu)
+echo 7. Vincular ChatGPT ao tunel MCP oficial (assistente somente leitura)
+echo 8. Ler guia de instalacao
+echo 9. Sair
+choice /c 123456789 /n /m "Escolha: "
+if errorlevel 9 exit /b 0
+if errorlevel 8 (start "" notepad.exe "%~dp0README-PTBR.md" & goto menu)
+if errorlevel 7 (call "%~dp0Vincular-ChatGPT.cmd" & goto menu)
 if errorlevel 6 (call "%~dp0Verificar-Catalogo-MCP.cmd" & goto menu)
 if errorlevel 5 (call "%~dp0Inventariar-Integracoes.cmd" & goto menu)
 if errorlevel 4 (call "%~dp0Diagnosticar.cmd" & goto menu)
