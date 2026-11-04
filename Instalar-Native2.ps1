@@ -114,6 +114,8 @@ try {
     Write-Host "Instalacao verificada: $install" -ForegroundColor Green
     Write-Host "Ao exportar os perfis no navegador, salve em: $(Join-Path $install 'dados')"
     Write-Host 'Use Iniciar.cmd nesta pasta para abrir o menu novamente.'
+    Write-Host 'Depois, use Vincular-ChatGPT.cmd para configurar o servidor MCP pelo fluxo oficial do ChatGPT.'
+    Write-Host 'O instalador prepara o assistente, mas nao pode registrar ou autorizar um conector no host por conta propria.'
     if (-not $NoOpen) { Start-Process -FilePath (Join-Path $install 'Iniciar.cmd') }
 } catch {
     Write-Host ('Falha: ' + $_.Exception.Message) -ForegroundColor Red
