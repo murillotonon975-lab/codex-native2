@@ -15,17 +15,21 @@ O ZIP contém o projeto completo. Extraia antes de executar os arquivos CMD. Nã
 
 O menu oferece painel de perfis, configuração do túnel, diagnóstico e este guia. Windows PowerShell 5.1 ou posterior; sem Node, Python ou dependências adicionais para usar.
 
-## Conectar ao ChatGPT
+## Conectar ao ChatGPT (fluxo oficial de servidor MCP)
 
-Pré-requisito: Codex Web GPT instalado separadamente, modo `full` e túnel ativo na sua conta. Use o fluxo mostrado pelo launcher para criar o túnel e registrar o conector. Recursos e permissões disponíveis dependem da conta e do host.
+O runtime local que anuncia 6/6 ferramentas via `tools/list` nao comprova que elas estejam visiveis no ChatGPT. O pacote local e o plugin de habilidades nao conseguem registrar ou autorizar ferramentas no host por conta propria.
 
-1. No menu, escolha **Configurar meu túnel**.
-2. Informe o seu identificador `tunnel_` seguido de 32 caracteres hexadecimais. Não informe chave API ou senha. Outros formatos não são aceitos nesta versão.
-3. O assistente gera um ZIP pessoal na pasta `dados`; importe esse ZIP no host que aceita esse formato de plugin. Se o host não oferecer importação, registre o conector pelo fluxo do launcher.
-4. Autorize as ações necessárias no host e mantenha o launcher aberto. Execute **Verify runtime**.
-5. Peça para listar as ferramentas e executar uma chamada somente de leitura. Somente a chamada bem-sucedida comprova funcionamento MCP.
+1. Execute `Vincular-ChatGPT.cmd` no menu 7. Ele consulta a instalacao em modo somente leitura, sem imprimir identificadores de tunel, tokens ou credenciais.
+2. No **ChatGPT web**, abra **Plugins → + → Adicionar servidor MCP personalizado** (Add custom MCP server).
+3. Escolha **Conexao: Tunel** (Tunnel), selecione o tunel ja existente da conta/workspace e configure a autenticacao apropriada. Nao recrie o tunel automaticamente.
+4. Confirme o aviso de risco e confira as **seis ferramentas** detectadas na revisao do servidor; entao crie/habilite o plugin de conexao.
+5. Abra uma **nova conversa** com o plugin habilitado, use `codex_tool_inventory` e execute uma leitura inofensiva via `codex_exec`. Somente a resposta real da ferramenta valida a integracao.
 
-O pacote público não inclui `mcp.json` vinculado a uma conta. O assistente gera esse arquivo localmente com seu túnel. Autenticação `none` reproduz o transporte de túnel gerenciado pelo host, não uma recomendação para expor servidores públicos sem autenticação. Não publique o ZIP pessoal gerado.
+Se o tunel nao estiver na lista, confira a associacao ao workspace ChatGPT e as permissoes de tunel `Tunnels Read + Use`. Se as ferramentas nao aparecerem na revisao do servidor, nao continue com a instalacao como se estivesse concluida: investigue autenticação, canal remoto e catalogo. Se a opcao de servidor MCP personalizado nao existir, verifique as politicas da conta/workspace.
+
+O menu 3 (`Configurar-Conexao.cmd`) continua como **modo legado** de geracao de ZIP pessoal para hosts compatíveis. Ele nao substitui o fluxo oficial de adicionar e testar um servidor MCP no ChatGPT e nao deve ser usado para sobrescrever um plugin 0.5.x com um pacote 0.4.x.
+
+Documentacao oficial: https://help.openai.com/pt-br/articles/12584461-connecting-custom-mcp-servers-in-chatgpt e https://developers.openai.com/api/docs/guides/secure-mcp-tunnels . Nunca publique o ZIP pessoal gerado nem insira chaves de API em conversas.
 
 ## Painel de conexões
 
