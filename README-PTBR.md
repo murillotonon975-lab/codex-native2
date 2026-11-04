@@ -1,5 +1,8 @@
 # Codex Native2
 
+> **LEIA PRIMEIRO:** [Ordem exata de execução no Windows](docs/ORDEM-DE-EXECUCAO.md) — qual arquivo abrir, o que cada script faz e quais operações evitar. **Para quem já usa Codex Web GPT**, comece por `Diagnosticar.cmd`; **para a primeira instalação do painel 0.4.0**, execute `Instalar-Native2.cmd` e depois `Iniciar.cmd` da pasta instalada. A interface nova de configuração está em [desenvolvimento na PR #1](https://github.com/murillotonon975-lab/codex-native2/pull/1), não está no ZIP da branch main.
+
+
 Assistente comunitário para configurar e diagnosticar a integração entre Codex Web GPT e ChatGPT no Windows. **0.4.0 BETA.** Não é um produto oficial da OpenAI e não distribui o launcher, o Codex CLI nem um servidor MCP próprio.
 
 [Baixar código e instalador (ZIP)](https://github.com/murillotonon975-lab/codex-native2/archive/refs/heads/main.zip) · [Ver arquivos](https://github.com/murillotonon975-lab/codex-native2)
