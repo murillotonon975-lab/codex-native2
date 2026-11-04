@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-native2",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Assistente local de instalação, perfis e diagnóstico do Codex Web GPT. Configure seu próprio túnel MCP.",
   "keywords": [
     "codex",
