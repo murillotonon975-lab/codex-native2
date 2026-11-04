@@ -6,7 +6,7 @@ O painel Windows possui tres acoes: **Previa de falha**, **Enviar Issue no GitHu
 
 O relatorio utiliza uma lista fechada de campos: data UTC, quantidade de rollouts e turnos analisados, quantidade de falhas de validacao de workspace, ultima data da falha e resultado da consulta local de ferramentas MCP. O script examina somente os registros session_meta, turn_context e o **tipo** de erro reconhecido. Ele nao inclui linhas de log, textos de conversas, IDs de turnos, IDs de tunel, caminhos locais, credenciais, comandos, detalhes do processo ou chaves.
 
-O repositorio murillotonon975-lab/codex-native2 e **publico**. Antes de enviar, abra a previa para revisar. O envio ocorre somente apos uma acao separada e confirmacao do usuario. Use uma conta GitHub autenticada no gh CLI para publicar.
+O repositorio murillotonon975-lab/codex-native2 e **publico**. Antes de enviar, abra a previa para revisar. O envio ocorre somente apos uma acao separada e confirmacao do usuario. No Windows, o painel usa GitHub CLI: execute uma vez `gh auth login` com sua conta autorizada antes da primeira publicacao ou exclusao. A conexao GitHub instalada no ChatGPT nao autentica automaticamente o CLI do computador.
 
 ## Comandos de operacao
 

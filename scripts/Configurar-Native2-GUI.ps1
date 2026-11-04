@@ -267,7 +267,13 @@ $reportPublish.Add_Click({
             [System.Windows.Forms.MessageBoxIcon]::Warning)
         if ($choice -ne [System.Windows.Forms.DialogResult]::Yes) { return }
         $result = (& $node.Source $script --publish --confirm-publish 2>&1 | Out-String)
-        if ($LASTEXITCODE -ne 0) { throw 'Publicacao nao confirmada. Verifique a autenticacao do GitHub.' }
+        if ($LASTEXITCODE -ne 0) {
+            if ($result -match 'GITHUB_AUTH_REQUIRED') {
+                $log.Text = 'GitHub CLI sem login. Execute gh auth login no Windows para publicar pelo painel.'
+                return
+            }
+            throw 'Publicacao nao confirmada. Verifique a autenticacao do GitHub.'
+        }
         $published = $result | ConvertFrom-Json
         if ($published.status -ne 'published') { throw 'GitHub nao confirmou a publicacao.' }
         $log.Text = 'Relatorio publicado no GitHub:' + [Environment]::NewLine + $published.url +
@@ -305,7 +311,13 @@ $reportDelete.Add_Click({
     if ($choice -ne [System.Windows.Forms.DialogResult]::Yes) { return }
     try {
         $result = (& $node.Source $script --delete $issueNumber --proof $selector.FileName --confirm-delete 2>&1 | Out-String)
-        if ($LASTEXITCODE -ne 0) { throw 'Exclusao nao confirmada.' }
+        if ($LASTEXITCODE -ne 0) {
+            if ($result -match 'GITHUB_AUTH_REQUIRED') {
+                $log.Text = 'GitHub CLI sem login. Execute gh auth login no Windows antes de apagar a Issue.'
+                return
+            }
+            throw 'Exclusao nao confirmada.'
+        }
         $deleted = $result | ConvertFrom-Json
         if ($deleted.status -ne 'deleted_on_github') { throw 'GitHub nao confirmou exclusao.' }
         $log.Text = 'Issue de diagnostico ' + $issueNumber + ' excluida do GitHub. Logs locais preservados.'

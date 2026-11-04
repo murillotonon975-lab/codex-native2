@@ -101,8 +101,14 @@ export function buildIssue(data){
   return {title:TITLE,body,repository:REPO};
 }
 async function gh(args){
-  const x=await run('gh',args,{windowsHide:true,maxBuffer:65536,timeout:20000});
-  return JSON.parse(x.stdout);
+  try {
+    const x=await run('gh',args,{windowsHide:true,maxBuffer:65536,timeout:20000});
+    return JSON.parse(x.stdout);
+  } catch {
+    try { await run('gh',['auth','status'],{windowsHide:true,maxBuffer:8192,timeout:10000}); }
+    catch { throw new Error('GITHUB_AUTH_REQUIRED'); }
+    throw new Error('GITHUB_API_CALL_FAILED');
+  }
 }
 async function publish(report){
   const x=await gh(['api','--method','POST','repos/'+REPO+'/issues','-f','title='+report.title,'-f','body='+report.body]);
@@ -142,7 +148,7 @@ async function main(argv){
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
   main(process.argv.slice(2)).catch(e=>{
-    const known=new Set(['REPORT_TOO_LARGE','ISSUE_CREATION_UNVERIFIED','INVALID_HOST_PROOF','REMOTE_TESTS_REQUIRED','STALE_HOST_PROOF','INVALID_ISSUE_NUMBER','HOST_PROOF_MISSING','NOT_A_NATIVE2_REPORT','GITHUB_DELETE_UNVERIFIED','DELETION_NEEDS_PROOF_AND_CONFIRMATION','UNKNOWN_ARGUMENT','PUBLICATION_NEEDS_CONFIRMATION']);
+    const known=new Set(['REPORT_TOO_LARGE','ISSUE_CREATION_UNVERIFIED','INVALID_HOST_PROOF','REMOTE_TESTS_REQUIRED','STALE_HOST_PROOF','INVALID_ISSUE_NUMBER','HOST_PROOF_MISSING','NOT_A_NATIVE2_REPORT','GITHUB_DELETE_UNVERIFIED','DELETION_NEEDS_PROOF_AND_CONFIRMATION','UNKNOWN_ARGUMENT','PUBLICATION_NEEDS_CONFIRMATION','GITHUB_AUTH_REQUIRED','GITHUB_API_CALL_FAILED']);
     console.error('ERRO: '+(known.has(e.message)?e.message:'GITHUB_OR_RUNTIME_UNAVAILABLE'));process.exitCode=1;
   });
 }
