@@ -7,7 +7,7 @@ dest=root/'dist';dest.mkdir(exist_ok=True)
 archive=dest/f'Codex-Native2-v{version}.zip'
 exclude={'.git','.github','dist','dados','logs','releases','tests','scripts','__pycache__'}
 # Runtime scripts are shipped; CI tests and publishing utilities are not.
-runtime_scripts={'scripts/Configurar-Native2-GUI.ps1','scripts/Verificar-Catalogo-MCP.mjs','scripts/Inventariar-Integracoes.mjs','scripts/Relatorio-Falhas-GitHub.mjs'}
+runtime_scripts={'scripts/Configurar-Native2-GUI.ps1','scripts/Verificar-Catalogo-MCP.mjs','scripts/Inventariar-Integracoes.mjs','scripts/Relatorio-Falhas-GitHub.mjs','scripts/Vincular-ChatGPT.ps1'}
 with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as z:
     for p in sorted(root.rglob('*')):
         rel=p.relative_to(root)
