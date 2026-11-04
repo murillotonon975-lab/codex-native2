@@ -23,6 +23,12 @@ O usuário quer **um único Codex Native2** com visão das ferramentas do PC e d
 - Em ausência de ferramenta Codex Native2 na sessão, procure ferramenta alternativa realmente autorizada (como Remote Desktop Commander); registre o fallback e não finja ter executado o Native2.
 - Não exponha ferramentas do ChatGPT para o computador criando um servidor público aberto, capturando sessão ou fazendo proxy de credenciais. Uma ponte **bidirecional** requer implementação específica do host, consentimento e identidade separada por usuário/tarefa.
 
+## Vinculação do ChatGPT
+
+Quando o catálogo MCP local anunciar 6/6 ferramentas mas o host não disponibilizar `codex_tool_inventory`, siga o fluxo oficial de ChatGPT web > Plugins > + > Adicionar servidor MCP personalizado > Conexão: Túnel. Selecione o túnel autorizado, revise as seis ferramentas e habilite a conexão na conversa. Antes disso, execute `Vincular-ChatGPT.cmd` no Windows autorizado: o assistente informa somente o estado local e não cria uma conexão remota. Verifique associação ao workspace e permissões Tunnels Read + Use se o túnel não aparecer. Não passe credenciais, não crie novo túnel automaticamente nem altere o plugin existente.
+
+A aprovação depende da chamada real de `codex_tool_inventory` e de uma operação inofensiva com `codex_exec` na sessão. Consulte https://help.openai.com/pt-br/articles/12584461-connecting-custom-mcp-servers-in-chatgpt .
+
 ## Verificação
 
 1. Consultar servidores MCP locais sem imprimir configuração sensível.
