@@ -25,14 +25,34 @@ function Get-LocalCatalogStatus {
     if (-not $node -or -not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
         return 'not_tested_node_unavailable'
     }
+    # Um processo .NET isolado permite consultar o codigo de saida sem alterar
+    # LASTEXITCODE do PowerShell chamador ou registrar os detalhes do stderr.
+    $process = $null
     try {
-        $output = (& $node.Source $ScriptPath --json 2>$null | Out-String).Trim()
-        if ($LASTEXITCODE -ne 0) { return 'failed' }
+        $info = New-Object System.Diagnostics.ProcessStartInfo
+        $info.FileName = $node.Source
+        $info.Arguments = ('"' + $ScriptPath + '" --json')
+        $info.UseShellExecute = $false
+        $info.CreateNoWindow = $true
+        $info.RedirectStandardOutput = $true
+        $info.RedirectStandardError = $true
+        $process = New-Object System.Diagnostics.Process
+        $process.StartInfo = $info
+        if (-not $process.Start()) { return 'failed' }
+        if (-not $process.WaitForExit(16000)) {
+            $process.Kill() # Apenas o processo temporario iniciado por este teste.
+            return 'timeout'
+        }
+        $output = $process.StandardOutput.ReadToEnd()
+        if ($process.ExitCode -ne 0) { return 'failed' }
         $result = $output | ConvertFrom-Json
         if ($result.found -eq 6 -and $result.expected -eq 6 -and
             @($result.missing).Count -eq 0) { return 'six_of_six_local_only' }
         return 'incomplete'
     } catch { return 'failed' }
+    finally {
+        if ($null -ne $process) { $process.Dispose() }
+    }
 }
 
 function Get-PluginManifestStatus {
@@ -83,12 +103,15 @@ try {
 } catch { $launcher = 'unavailable' }
 
 $tunnelClients = @(Get-Process -Name 'tunnel-client' -ErrorAction SilentlyContinue)
+$catalog = if ($launcher -eq 'ok_full') {
+    Get-LocalCatalogStatus -ScriptPath $probe
+} else { 'not_tested_launcher_unavailable' }
 $report = [ordered]@{
     launcher = $launcher
     tunnelClientProcess = $(if ($tunnelClients.Count -gt 0) { 'running' } else { 'not_detected' })
     launcherTunnelIdCount = $ids.Count
     pluginManifest = Get-PluginManifestStatus -ExpectedId $expectedId -PluginRoot $pluginRoot
-    localToolCatalog = Get-LocalCatalogStatus -ScriptPath $probe
+    localToolCatalog = $catalog
     tunnelAuthenticated = 'not_verified'
     chatgptCustomMcpRegistered = 'not_verified'
     chatgptToolCatalog = 'not_verified'
