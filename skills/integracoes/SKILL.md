@@ -20,7 +20,17 @@ O usuário quer **um único Codex Native2** com visão das ferramentas do PC e d
 - Para descoberta, informe por origem se está: **registrado**, **conectado**, **anunciado à sessão**, **testado com chamada real** ou **indisponível**.
 - Mantenha um único catálogo visual, mas nunca misture disponibilidade local com disponibilidade no ChatGPT; enumeração local não significa que o host criou aquela ferramenta.
 - Antes de executar ações mutáveis, use verificação de leitura, confira ambiente, aprovação e escopo. Não faça `deploy`, `merge`, mudanças em produção, alterações de permissões ou operações destrutivas sem autorização.
-- Em ausência de ferramenta Codex Native2 na sessão, procure ferramenta alternativa realmente autorizada (como Remote Desktop Commander); registre o fallback e não finja ter executado o Native2.
+- Em ausencia das ferramentas Codex Native2 na sessao, use **Remote Desktop Commander** apenas quando a integracao estiver anunciada pelo host, a conta a autorizar e o computador-alvo estiver online. Consulte `list_devices` e selecione o dispositivo correto antes de operar. Informe o fallback pelo nome: `remote_desktop_commander`.
+- A contingencia e **roteamento semantico**, nao um proxy MCP transparente nem um desbloqueio de permissao do plano/workspace. Descubra os nomes e esquemas reais antes de chamar:
+  - Leitura e busca: `read_file`, `read_multiple_files`, `start_search`.
+  - Diagnostico: `list_devices`, `list_processes`, `get_file_info`.
+  - Equivalente operacional de `codex_exec`: `start_process`, com diretorio e comando autorizados; continuidade via `read_process_output` e `interact_with_process`.
+  - Edicao textual sob autorizacao: `edit_block` ou `write_file`.
+  - Imagem local: `read_file` quando suportado no dispositivo autorizado.
+  - Catalogo de seis entradas Native2: executar o script local `Verificar-Catalogo-MCP.mjs` pelo Commander, caso permitido; isso **nao** valida `codex_tool_inventory` de tarefa ativa.
+- Nunca envie `turn_token`, segredos, cookies, chaves de API, credenciais ou objetos internos de sessao por outro plugin. Preserve UAC, sandbox e escopo. Se a chamada remota retornar `call_id` em andamento, use `get_tool_result` e nao repita operacoes com efeitos colaterais.
+- Relate exatamente qual ferramenta executou o trabalho; uma operacao bem-sucedida pelo Commander nao altera o estado `0/6` do catalogo Native2.
+
 - Não exponha ferramentas do ChatGPT para o computador criando um servidor público aberto, capturando sessão ou fazendo proxy de credenciais. Uma ponte **bidirecional** requer implementação específica do host, consentimento e identidade separada por usuário/tarefa.
 
 ## Vinculação do ChatGPT
