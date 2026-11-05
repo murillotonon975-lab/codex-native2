@@ -55,3 +55,4 @@ jobs:
           $online = & ./scripts/Selecionar-Transporte.ps1 -Mode Online -Action Inspect -Json | ConvertFrom-Json
           if ($online.transportConfigured -or $online.tunnelAuthenticated -ne 'not_verified') { throw 'Inspect must be read-only and not claim remote readiness' }
           & ./tests/transport-selection.test.ps1
+          & ./tests/registration-throttle.test.ps1
