@@ -53,6 +53,19 @@ A habilidade de integracoes detecta o catalogo Native2 **da tarefa**. Quando ind
 
 Isso **nao transforma** `codex_exec` em ferramenta anunciada, nao transmite `turn_token`, nem falsifica ferramentas nativas. Cada acao usa o proprio esquema e as autorizacoes do Commander. Para comandos com `call_id` pendente, consultar `get_tool_result` antes de reenviar qualquer alteracao.
 
+## Erros de workspace_roots
+
+Os metadados `session_meta.runtime_workspace_roots` e `turn_context.cwd` devem pertencer a mesma sessao/tarefa. Um diretorio de outra tarefa pode provocar `Codex rollout cwd is outside its workspace roots`, ainda que o runtime e o tunel estejam ativos.
+
+- Verifique a raiz do workspace escolhida na tarefa ativa do Codex Web GPT e o diretorio de trabalho enviado no turno. Corrija a associacao na propria tarefa, usando uma raiz autorizada.
+- Nao acrescente automaticamente `C:\\`, `D:\\` nem todas as pastas do usuario a `workspace_roots`; isso ampliaria indevidamente o acesso.
+- O relatorio sanitizado conta `outside` apenas quando existem diretorio e raizes Windows absolutos. Quando faltam esses metadados, registra `unknown` e nao afirma que houve erro de raiz.
+- A correcao da selecao de tarefa e de `workspace_roots` no broker/host exige alterar e validar o runtime Codex Web GPT. O assistente desta PR nao substitui esse componente; requer teste nativo com uma tarefa autorizada.
+
+## Diagnostico do executavel do tunel
+
+O seletor primeiro procura `tunnel-client.exe` no PATH; se nao encontrar, consulta apenas o caminho do processo `tunnel-client` ja em execucao. O caminho completo nao aparece no relatorio. O campo `tunnelClientExecutableSource` informa `PATH`, `running_process` ou `not_detected`. Esse resultado **nao** prova autenticacao do tunel nem autoriza criar outro processo. Se houver multiplos executaveis diferentes de processos ativos, o seletor nao escolhe um arbitrariamente.
+
 ## Criterios de homologacao
 
 1. Detectar status e nao expor secrets/IDs em JSON.
