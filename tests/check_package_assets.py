@@ -12,6 +12,8 @@ with ZipFile(archive) as package:
         "codex-native2/Iniciar.cmd",
         "codex-native2/Vincular-ChatGPT.cmd",
         "codex-native2/scripts/Vincular-ChatGPT.ps1",
+        "codex-native2/Controlar-Cadastro-MCP.cmd",
+        "codex-native2/Controlar-Cadastro-MCP.ps1",
         "codex-native2/Selecionar-Transporte.cmd",
         "codex-native2/scripts/Selecionar-Transporte.ps1",
         "codex-native2/Inventariar-Integracoes.cmd",
