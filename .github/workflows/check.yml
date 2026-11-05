@@ -50,3 +50,7 @@ jobs:
           if ($plus.chatgptPlanMcpEntitlement -ne 'not_verified' -or $plus.codexExecFromChatGPT -ne 'not_verified') { throw 'Manual plan report must not claim remote verification' }
           $business = & ./scripts/Vincular-ChatGPT.ps1 -Json -ChatGPTPlan Business | ConvertFrom-Json
           if ($business.fullMcpFromReportedPlan -ne 'eligible_if_workspace_authorized' -or $business.chatgptPlanMcpEntitlement -ne 'not_verified') { throw 'Business still requires workspace authorization' }
+          $transport = & ./scripts/Selecionar-Transporte.ps1 -Mode Auto -Action Inspect -Json | ConvertFrom-Json
+          if ($transport.chatgptToolsExposed -ne 'not_verified' -or $transport.remoteExecution -ne 'not_verified') { throw 'Transport must not claim ChatGPT execution' }
+          $online = & ./scripts/Selecionar-Transporte.ps1 -Mode Online -Action Inspect -Json | ConvertFrom-Json
+          if ($online.transportConfigured -or $online.tunnelAuthenticated -ne 'not_verified') { throw 'Inspect must be read-only and not claim remote readiness' }
