@@ -22,7 +22,7 @@ export function inWindowsRoot(root,cwd){
 }
 export function summarizeRollout(raw){
   if(typeof raw!=='string'||Buffer.byteLength(raw)>MAX_ROLLOUT)return null;
-  let roots=[],turns=0,outside=0,errors=0,lastError=null;
+  let roots=[],turns=0,outside=0,unknown=0,errors=0,lastError=null;
   for(const line of raw.split(/\r?\n/)){
     if(!line.trim())continue;
     let x;try{x=JSON.parse(line)}catch{continue}
@@ -32,7 +32,9 @@ export function summarizeRollout(raw){
       turns++;
       const p=x.payload??{};
       const current=Array.isArray(p.workspace_roots)?p.workspace_roots:roots;
-      if(!current.some(root=>inWindowsRoot(root,p.cwd)))outside++;
+      const validRoots=current.filter(root=>typeof root==='string'&&win32.isAbsolute(root));
+      if(!validRoots.length||typeof p.cwd!=='string'||!win32.isAbsolute(p.cwd))unknown++;
+      else if(!validRoots.some(root=>inWindowsRoot(root,p.cwd)))outside++;
     }else if(x.type==='event_msg'){
       const message=x.payload?.error?.message;
       if(typeof message==='string'&&message.includes('Codex rollout cwd is outside its workspace roots')){
@@ -40,11 +42,11 @@ export function summarizeRollout(raw){
       }
     }
   }
-  return {turns,outside,errors,lastError};
+  return {turns,outside,unknown,errors,lastError};
 }
 export function summarizeMultiple(raws){
   const all=raws.map(summarizeRollout).filter(Boolean);
-  return {files:all.length,turns:all.reduce((a,v)=>a+v.turns,0),outside:all.reduce((a,v)=>a+v.outside,0),errors:all.reduce((a,v)=>a+v.errors,0),lastError:all.map(x=>x.lastError).filter(Boolean).sort().at(-1)??null};
+  return {files:all.length,turns:all.reduce((a,v)=>a+v.turns,0),outside:all.reduce((a,v)=>a+v.outside,0),unknown:all.reduce((a,v)=>a+v.unknown,0),errors:all.reduce((a,v)=>a+v.errors,0),lastError:all.map(x=>x.lastError).filter(Boolean).sort().at(-1)??null};
 }
 function safeSessionFiles(){
   const base=join(homedir(),'.codex','sessions'),files=[];
@@ -84,6 +86,7 @@ export function buildIssue(data){
     '- Falha no MCP local: '+(local.errorCode==='LOCAL_MCP_NOT_VERIFIED'?'LOCAL_MCP_NOT_VERIFIED':local.errorCode==='MISSING_LOCAL_TOOLS'?'MISSING_LOCAL_TOOLS':'nenhuma detectada'),
     '- Arquivos de rollout analisados: '+num(roll.files),
     '- Turnos com diretorio fora da raiz: '+num(roll.outside),
+    '- Turnos sem raiz verificavel: '+num(roll.unknown),
     '- Erros de raiz registrados: '+num(roll.errors),
     '- Data da ultima falha: '+(date(roll.lastError)??'nao identificada'),
     '- codex_tool_inventory anunciado no host: PENDENTE DE CONFIRMACAO',
