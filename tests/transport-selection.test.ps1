@@ -44,11 +44,11 @@ try {
     # Fixture inerte: o caminho precisa ser detectado, mas nunca executado.
     $fakeClient=Join-Path $runtimeDir 'tunnel-client.exe'
     [IO.File]::WriteAllBytes($fakeClient,[byte[]]@(0))
-    $script:mockTunnelPath=$fakeClient
+    $global:codexTunnelMockPath=$fakeClient
     function Get-Process {
         [CmdletBinding()]
         param([string]$Name)
-        if ($Name -eq 'tunnel-client') { [pscustomobject]@{Path=$script:mockTunnelPath} }
+        if ($Name -eq 'tunnel-client') { [pscustomobject]@{Path=$global:codexTunnelMockPath} }
     }
     $processClient=(& $script -Mode Existing -Action Inspect -Json | ConvertFrom-Json)
     if (-not $processClient.tunnelClientExecutableAvailable -or $processClient.tunnelClientExecutableSource -ne 'running_process') {
@@ -67,5 +67,6 @@ try {
     $env:LOCALAPPDATA=$originalLocalAppData
     $env:PATH=$originalPath
     Remove-Item function:Get-Process -ErrorAction SilentlyContinue
+    Remove-Variable -Name codexTunnelMockPath -Scope Global -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
 }
