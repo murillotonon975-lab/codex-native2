@@ -77,9 +77,40 @@ function Get-SafeCommandText {
 $config=Get-LauncherSettings
 $runtime=Get-LocalRuntime -Config $config
 $existing=Get-ExistingTunnelId -Config $config
-$client=Get-Command 'tunnel-client.exe' -ErrorAction SilentlyContinue
-if (-not $client) { $client=Get-Command 'tunnel-client' -ErrorAction SilentlyContinue }
-$clientProcess=@(Get-Process -Name 'tunnel-client' -ErrorAction SilentlyContinue).Count -gt 0
+# Procura no PATH e, quando necessario, no executavel de um processo ativo.
+# Nunca publica o caminho completo ou abre um novo tunel para diagnosticar.
+function Find-TunnelClientExecutable {
+    param([object[]]$Processes)
+    $commands=@(Get-Command -Name 'tunnel-client.exe','tunnel-client' -CommandType Application -ErrorAction SilentlyContinue)
+    foreach ($command in $commands) {
+        $candidate=[string]$command.Source
+        if ($candidate -and [IO.Path]::GetFileName($candidate) -ieq 'tunnel-client.exe' -and
+            (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+            return [pscustomobject]@{Source=$candidate; Origin='PATH'}
+        }
+    }
+    $candidates=@()
+    foreach ($process in $Processes) {
+        $candidate=''
+        try { $candidate=[string]$process.Path } catch {}
+        if (-not $candidate) {
+            try { $candidate=[string]$process.MainModule.FileName } catch {}
+        }
+        if ($candidate -and [IO.Path]::GetFileName($candidate) -ieq 'tunnel-client.exe' -and
+            (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+            $candidates+= $candidate
+        }
+    }
+    # Uma origem ambigua nao deve ser escolhida automaticamente.
+    $unique=@($candidates | Sort-Object -Unique)
+    if ($unique.Count -eq 1) {
+        return [pscustomobject]@{Source=$unique[0]; Origin='running_process'}
+    }
+    return $null
+}
+$clientProcesses=@(Get-Process -Name 'tunnel-client' -ErrorAction SilentlyContinue)
+$clientProcess=$clientProcesses.Count -gt 0
+$client=Find-TunnelClientExecutable -Processes $clientProcesses
 $selected=$Mode
 if ($Mode -eq 'Auto') {
     if ($existing -and $clientProcess) { $selected='Existing' }
@@ -97,6 +128,7 @@ $report=[ordered]@{
     existingTunnelConfigured=([bool]$existing)
     tunnelClientRunning=$clientProcess
     tunnelClientExecutableAvailable=($null -ne $client)
+    tunnelClientExecutableSource=$(if ($client) { $client.Origin } else { 'not_detected' })
     transportConfigured=$false
     tunnelAuthenticated='not_verified'
     chatgptToolsExposed='not_verified'
