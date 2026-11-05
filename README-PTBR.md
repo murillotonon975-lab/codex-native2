@@ -2,7 +2,7 @@
 
 Assistente comunitário para configurar e diagnosticar a integração entre Codex Web GPT e ChatGPT no Windows. **0.4.1 BETA.** Não é um produto oficial da OpenAI e não distribui o launcher, o Codex CLI nem um servidor MCP próprio.
 
-[Baixar código e instalador (ZIP)](https://github.com/murillotonon975-lab/codex-native2/archive/refs/heads/main.zip) · [Ver arquivos](https://github.com/murillotonon975-lab/codex-native2)
+**[Instalador v0.4.1 BETA (GitHub Releases)](https://github.com/murillotonon975-lab/codex-native2/releases/tag/v0.4.1-beta.1)** · [Baixar ZIP](https://github.com/murillotonon975-lab/codex-native2/releases/download/v0.4.1-beta.1/Codex-Native2-v0.4.1.zip) · [SHA-256](https://github.com/murillotonon975-lab/codex-native2/releases/download/v0.4.1-beta.1/SHA256SUMS) · [Código desta branch](https://github.com/murillotonon975-lab/codex-native2/tree/codex/fix-chatgpt-tunnel-onboarding-20261104)
 
 O ZIP contém o projeto completo. Extraia antes de executar os arquivos CMD. Não envie o ZIP de código-fonte como atualização de um plugin instalado; o assistente gera um pacote pessoal separado.
 
