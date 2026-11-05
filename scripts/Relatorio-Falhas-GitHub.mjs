@@ -20,9 +20,14 @@ export function inWindowsRoot(root,cwd){
   const rel=win32.relative(win32.normalize(root),win32.normalize(cwd));
   return rel===''||(rel!=='..'&&!rel.startsWith('..\\')&&!win32.isAbsolute(rel));
 }
+function canonicalRootSet(roots){
+  if(!Array.isArray(roots))return [];
+  return [...new Set(roots.filter(x=>typeof x==='string'&&win32.isAbsolute(x))
+    .map(x=>win32.normalize(x).toLowerCase()))].sort();
+}
 export function summarizeRollout(raw){
   if(typeof raw!=='string'||Buffer.byteLength(raw)>MAX_ROLLOUT)return null;
-  let roots=[],turns=0,outside=0,unknown=0,errors=0,lastError=null;
+  let roots=[],turns=0,outside=0,unknown=0,metadataDifferences=0,errors=0,lastError=null;
   for(const line of raw.split(/\r?\n/)){
     if(!line.trim())continue;
     let x;try{x=JSON.parse(line)}catch{continue}
@@ -32,6 +37,12 @@ export function summarizeRollout(raw){
       turns++;
       const p=x.payload??{};
       const current=Array.isArray(p.workspace_roots)?p.workspace_roots:roots;
+      // Divergencias entre metadados da sessao e do turno exigem revisao do vinculo.
+      // Uma mudanca de workspace pode ser intencional: nao a classificar como erro confirmado.
+      if(Array.isArray(p.workspace_roots)){
+        const sessionRoots=canonicalRootSet(roots),turnRoots=canonicalRootSet(p.workspace_roots);
+        if(sessionRoots.length&&turnRoots.length&&JSON.stringify(sessionRoots)!==JSON.stringify(turnRoots))metadataDifferences++;
+      }
       const validRoots=current.filter(root=>typeof root==='string'&&win32.isAbsolute(root));
       if(!validRoots.length||typeof p.cwd!=='string'||!win32.isAbsolute(p.cwd))unknown++;
       else if(!validRoots.some(root=>inWindowsRoot(root,p.cwd)))outside++;
@@ -42,11 +53,11 @@ export function summarizeRollout(raw){
       }
     }
   }
-  return {turns,outside,unknown,errors,lastError};
+  return {turns,outside,unknown,metadataDifferences,errors,lastError};
 }
 export function summarizeMultiple(raws){
   const all=raws.map(summarizeRollout).filter(Boolean);
-  return {files:all.length,turns:all.reduce((a,v)=>a+v.turns,0),outside:all.reduce((a,v)=>a+v.outside,0),unknown:all.reduce((a,v)=>a+v.unknown,0),errors:all.reduce((a,v)=>a+v.errors,0),lastError:all.map(x=>x.lastError).filter(Boolean).sort().at(-1)??null};
+  return {files:all.length,turns:all.reduce((a,v)=>a+v.turns,0),outside:all.reduce((a,v)=>a+v.outside,0),unknown:all.reduce((a,v)=>a+v.unknown,0),metadataDifferences:all.reduce((a,v)=>a+v.metadataDifferences,0),errors:all.reduce((a,v)=>a+v.errors,0),lastError:all.map(x=>x.lastError).filter(Boolean).sort().at(-1)??null};
 }
 function safeSessionFiles(){
   const base=join(homedir(),'.codex','sessions'),files=[];
@@ -87,13 +98,14 @@ export function buildIssue(data){
     '- Arquivos de rollout analisados: '+num(roll.files),
     '- Turnos com diretorio fora da raiz: '+num(roll.outside),
     '- Turnos sem raiz verificavel: '+num(roll.unknown),
+    '- Turnos com raizes divergentes entre sessao e turno: '+num(roll.metadataDifferences),
     '- Erros de raiz registrados: '+num(roll.errors),
     '- Data da ultima falha: '+(date(roll.lastError)??'nao identificada'),
     '- codex_tool_inventory anunciado no host: PENDENTE DE CONFIRMACAO',
     '- Chamada nativa de leitura: PENDENTE',
     '',
     '## Investigacao',
-    '1. Conferir a vinculacao do workspace entre session_meta e turn_context.',
+    '1. Conferir divergencias de workspace entre session_meta e turn_context; uma troca autorizada de raiz nao e necessariamente um erro.',
     '2. Conferir registro do conector do ChatGPT e anuncio de ferramentas.',
     '3. Validar codex_tool_inventory e uma chamada de leitura na tarefa autorizada.',
     '4. Apos a verificacao real da correcao, excluir este relatorio do GitHub.',
