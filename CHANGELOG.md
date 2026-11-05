@@ -1,5 +1,13 @@
 # Histórico
 
+## 0.4.1 BETA (candidata para homologacao)
+
+- Assistente Windows para vincular ChatGPT a servidor MCP personalizado pelo tunel oficial.
+- Distingue catalogo local, processo de tunel, manifesto e execucao remota nao verificada.
+- Instalador e menu incluem o assistente; nao alteram credenciais ou conexoes do usuario.
+- ZIP de homologacao e SHA256 publicados como artefato de CI apos testes; sem publicacao automatica.
+- Plugin privado 0.5.x e runtime do Codex Web GPT permanecem independentes desta versao do painel.
+
 ## 0.4.0 BETA
 
 - Distribuição pública sem o identificador de túnel de uma conta.

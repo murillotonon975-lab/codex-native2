@@ -35,7 +35,10 @@ try {
     $zip = Join-Path $OutputDirectory ('Codex-Native2-conectado-' + $id + '.zip')
     Compress-Archive -LiteralPath $package -DestinationPath $zip -CompressionLevel Optimal
     Write-Host "Pacote pessoal gerado: $zip" -ForegroundColor Green
-    Write-Host 'Importe este ZIP no ChatGPT e autorize o tunel correto. Mantenha o launcher aberto.'
+    Write-Host 'PACOTE LEGADO: este ZIP nao registra automaticamente um MCP no ChatGPT.'
+    Write-Host 'Prefira ChatGPT > Plugins > + > Adicionar servidor MCP personalizado > Tunel.'
+    Write-Host 'Nao substitua um plugin instalado 0.5.x por este pacote 0.4.x sem revisar a compatibilidade.'
+    Write-Host 'Importe o ZIP apenas em hosts compativeis, se precisar do fluxo legado. Mantenha o launcher aberto.'
     Write-Host 'Auth none corresponde ao tunel gerenciado pelo host; nao exponha um servidor HTTP publico sem autenticacao.'
     Write-Host 'Depois: Verify runtime, listar ferramentas e chamada somente de leitura. O ZIP gerado nao comprova conexao.'
     Write-Host 'Nao publique este pacote pessoal em repositorios. Nenhuma configuracao do launcher foi alterada.'

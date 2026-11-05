@@ -1,0 +1,93 @@
+name: Publicar instalador BETA (homologacao)
+
+on:
+  push:
+    branches:
+      - codex/fix-chatgpt-tunnel-onboarding-20261104
+    paths:
+      - .github/workflows/publish-beta.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows-check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Conferir sintaxe PowerShell
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count) {
+              $errors | Write-Output
+              $failed = $true
+            }
+          }
+          if ($failed) { exit 1 }
+
+  prerelease:
+    needs: windows-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validar e empacotar instalador
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/validate.py
+          node --test tests/profiles.test.cjs tests/mcp-probe.test.mjs tests/inventory-integrations.test.mjs
+          python scripts/package.py
+          python tests/check_package_assets.py
+          (cd dist && sha256sum --check SHA256SUMS)
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          version=json.loads(Path("plugin.json").read_text(encoding="utf-8"))["version"]
+          assert version == "0.4.1", f"Version mismatch: {version}"
+          assert Path(f"dist/Codex-Native2-v{version}.zip").is_file()
+          PY
+      - name: Publicar como PRE-RELEASE (nunca marcar Latest)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="v0.4.1-beta.1"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "O pre-lancamento $tag ja existe. Nenhuma sobrescrita realizada."
+            exit 0
+          fi
+          cat > release-notes.md <<'NOTES'
+          ## Codex Native2 v0.4.1 BETA — instalador para HOMOLOGAÇÃO
+
+          **Pré-lançamento, ainda não homologado no Windows do usuário.**
+          Este pacote contém o instalador/painel do projeto; não atualiza automaticamente
+          o plugin privado do ChatGPT (versão 0.5.2) nem o runtime Codex Web GPT.
+
+          Inclui assistente de túnel, seleção de transporte local/online,
+          diagnóstico de catálogo e instruções para contingência via
+          Remote Desktop Commander quando disponível e autorizado.
+
+          **Downloads**
+          - `Codex-Native2-v0.4.1.zip`: pacote de instalação/extrair no Windows.
+          - `SHA256SUMS`: soma SHA-256 para conferir a integridade do ZIP.
+
+          **Validação:** testes automatizados Linux/Windows no GitHub Actions.
+          **Pendente:** instalação no PC e comunicação MCP ponta a ponta.
+          **Fonte:** PR #3 (ainda em rascunho, sem merge com main).
+
+          Esta versão não deve ser tratada como lançamento estável.
+          NOTES
+          gh release create "$tag"             dist/Codex-Native2-v0.4.1.zip dist/SHA256SUMS             --repo "$GITHUB_REPOSITORY"             --target "$GITHUB_SHA"             --prerelease             --title "Codex Native2 v0.4.1 BETA — Instalador de Homologação"             --notes-file release-notes.md

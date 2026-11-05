@@ -113,7 +113,22 @@ try {
     $record | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $install 'logs\instalacao.json') -Encoding UTF8
     Write-Host "Instalacao verificada: $install" -ForegroundColor Green
     Write-Host "Ao exportar os perfis no navegador, salve em: $(Join-Path $install 'dados')"
+    # Configurar preferencia segura a partir do estado existente; nao cria tunel
+    # remoto nem interfere em processos ativos. Uma falha aqui nao invalida a copia.
+    try {
+        $transportScript=Join-Path $install 'scripts\Selecionar-Transporte.ps1'
+        $transportStatus = & powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File $transportScript -Mode Auto -Action Configure -Json | ConvertFrom-Json
+        if ($transportStatus.transportConfigured) {
+            Write-Host "Transporte selecionado: $($transportStatus.selectedMode)" -ForegroundColor Green
+        } else {
+            Write-Host 'Transporte: nenhuma configuracao nova (execute Selecionar-Transporte.cmd).'
+        }
+    } catch {
+        Write-Host 'Transporte local: configuracao opcional pendente; instalacao preservada.' -ForegroundColor Yellow
+    }
     Write-Host 'Use Iniciar.cmd nesta pasta para abrir o menu novamente.'
+    Write-Host 'Depois, use Vincular-ChatGPT.cmd para configurar o servidor MCP pelo fluxo oficial do ChatGPT.'
+    Write-Host 'O instalador prepara o assistente, mas nao pode registrar ou autorizar um conector no host por conta propria.'
     if (-not $NoOpen) { Start-Process -FilePath (Join-Path $install 'Iniciar.cmd') }
 } catch {
     Write-Host ('Falha: ' + $_.Exception.Message) -ForegroundColor Red

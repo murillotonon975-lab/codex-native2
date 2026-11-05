@@ -10,11 +10,18 @@ with ZipFile(archive) as package:
     names = set(package.namelist())
     required = {
         "codex-native2/Iniciar.cmd",
+        "codex-native2/Vincular-ChatGPT.cmd",
+        "codex-native2/scripts/Vincular-ChatGPT.ps1",
+        "codex-native2/Controlar-Cadastro-MCP.cmd",
+        "codex-native2/Controlar-Cadastro-MCP.ps1",
+        "codex-native2/Selecionar-Transporte.cmd",
+        "codex-native2/scripts/Selecionar-Transporte.ps1",
         "codex-native2/Inventariar-Integracoes.cmd",
         "codex-native2/Verificar-Catalogo-MCP.cmd",
         "codex-native2/scripts/Configurar-Native2-GUI.ps1",
         "codex-native2/scripts/Inventariar-Integracoes.mjs",
         "codex-native2/scripts/Verificar-Catalogo-MCP.mjs",
+        "codex-native2/scripts/Relatorio-Falhas-GitHub.mjs",
         "codex-native2/skills/integracoes/SKILL.md",
         "codex-native2/docs/CATALOGO-FERRAMENTAS.md",
     }
