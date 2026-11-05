@@ -3,6 +3,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $originalUserProfile=$env:USERPROFILE
 $originalLocalAppData=$env:LOCALAPPDATA
+$originalPath=$env:PATH
 $root=Join-Path ([IO.Path]::GetTempPath()) ('Native2TransportTest-'+[guid]::NewGuid().ToString('N'))
 try {
     $profile=Join-Path $root 'profile'
@@ -40,9 +41,31 @@ try {
     if ((Get-Content -LiteralPath $modeFile -Raw | ConvertFrom-Json).mode -ne 'Existing') { throw 'Existing profile not saved.' }
     if ($existing.tunnelAuthenticated -ne 'not_verified' -or $existing.remoteExecution -ne 'not_verified') { throw 'Remote state incorrectly claimed.' }
     if ((Get-Content -LiteralPath $modeFile -Raw) -match 'tunnel_[a-f0-9]{32}') { throw 'Tunnel ID was written to local preference.' }
-    Write-Host 'Transport inspect, local configure, existing reuse and rollback verification passed.'
+    # Fixture inerte: o caminho precisa ser detectado, mas nunca executado.
+    $fakeClient=Join-Path $runtimeDir 'tunnel-client.exe'
+    [IO.File]::WriteAllBytes($fakeClient,[byte[]]@(0))
+    $script:mockTunnelPath=$fakeClient
+    function Get-Process {
+        [CmdletBinding()]
+        param([string]$Name)
+        if ($Name -eq 'tunnel-client') { [pscustomobject]@{Path=$script:mockTunnelPath} }
+    }
+    $processClient=(& $script -Mode Existing -Action Inspect -Json | ConvertFrom-Json)
+    if (-not $processClient.tunnelClientExecutableAvailable -or $processClient.tunnelClientExecutableSource -ne 'running_process') {
+        throw 'Running-process executable lookup failed.'
+    }
+    Remove-Item function:Get-Process -ErrorAction SilentlyContinue
+    $env:PATH=$runtimeDir + [IO.Path]::PathSeparator + $originalPath
+    $pathClient=(& $script -Mode Existing -Action Inspect -Json | ConvertFrom-Json)
+    if (-not $pathClient.tunnelClientExecutableAvailable -or $pathClient.tunnelClientExecutableSource -ne 'PATH') {
+        throw 'PATH executable lookup failed.'
+    }
+    if (($pathClient | ConvertTo-Json) -match [regex]::Escape($root)) { throw 'Private executable path leaked in report.' }
+    Write-Host 'Transport inspect, local configure, existing reuse, binary lookup and rollback verification passed.'
 } finally {
     $env:USERPROFILE=$originalUserProfile
     $env:LOCALAPPDATA=$originalLocalAppData
+    $env:PATH=$originalPath
+    Remove-Item function:Get-Process -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
 }
