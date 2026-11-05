@@ -45,3 +45,8 @@ jobs:
           $result = & ./scripts/Vincular-ChatGPT.ps1 -Json | ConvertFrom-Json
           if ($result.chatgptToolCatalog -ne 'not_verified' -or $result.codexExecFromChatGPT -ne 'not_verified' -or $result.chatgptPlanMcpEntitlement -ne 'not_verified' -or $result.tunnelWorkspaceAssociation -ne 'not_verified') { throw 'Remote checks must never be claimed by local preflight' }
           if (($result | ConvertTo-Json) -match 'tunnel_[a-f0-9]{32}') { throw 'Tunnel ID exposed in output' }
+          $plus = & ./scripts/Vincular-ChatGPT.ps1 -Json -ChatGPTPlan Plus | ConvertFrom-Json
+          if ($plus.reportedChatGPTPlan -ne 'Plus' -or $plus.fullMcpFromReportedPlan -ne 'not_available_on_plan') { throw 'Plus must not claim full MCP entitlement' }
+          if ($plus.chatgptPlanMcpEntitlement -ne 'not_verified' -or $plus.codexExecFromChatGPT -ne 'not_verified') { throw 'Manual plan report must not claim remote verification' }
+          $business = & ./scripts/Vincular-ChatGPT.ps1 -Json -ChatGPTPlan Business | ConvertFrom-Json
+          if ($business.fullMcpFromReportedPlan -ne 'eligible_if_workspace_authorized' -or $business.chatgptPlanMcpEntitlement -ne 'not_verified') { throw 'Business still requires workspace authorization' }
