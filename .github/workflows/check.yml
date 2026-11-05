@@ -54,3 +54,4 @@ jobs:
           if ($transport.chatgptToolsExposed -ne 'not_verified' -or $transport.remoteExecution -ne 'not_verified') { throw 'Transport must not claim ChatGPT execution' }
           $online = & ./scripts/Selecionar-Transporte.ps1 -Mode Online -Action Inspect -Json | ConvertFrom-Json
           if ($online.transportConfigured -or $online.tunnelAuthenticated -ne 'not_verified') { throw 'Inspect must be read-only and not claim remote readiness' }
+          & ./tests/transport-selection.test.ps1
