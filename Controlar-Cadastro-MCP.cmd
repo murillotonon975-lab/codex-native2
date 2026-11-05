@@ -14,6 +14,6 @@ if errorlevel 2 (
     exit /b 0
 )
 if errorlevel 1 (
-    powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\Controlar-Cadastro-MCP.ps1" -Action ReportRateLimit
+    powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0Controlar-Cadastro-MCP.ps1" -Action ReportRateLimit
     pause
 )
