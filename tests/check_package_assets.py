@@ -21,6 +21,7 @@ with ZipFile(archive) as package:
         "codex-native2/scripts/Configurar-Native2-GUI.ps1",
         "codex-native2/scripts/Inventariar-Integracoes.mjs",
         "codex-native2/scripts/Verificar-Catalogo-MCP.mjs",
+        "codex-native2/scripts/Relatorio-Falhas-GitHub.mjs",
         "codex-native2/skills/integracoes/SKILL.md",
         "codex-native2/docs/CATALOGO-FERRAMENTAS.md",
     }
