@@ -15,6 +15,21 @@ O ZIP contém o projeto completo. Extraia antes de executar os arquivos CMD. Nã
 
 O menu oferece painel de perfis, configuração do túnel, diagnóstico e este guia. Windows PowerShell 5.1 ou posterior; sem Node, Python ou dependências adicionais para usar.
 
+## Escolher modo de conexao automaticamente ou manualmente
+
+O instalador consulta a configuracao existente e salva uma preferencia em `%LOCALAPPDATA%\CodexNative2\transporte.json`, sem sobrescrever o launcher nem recriar tunel ativo. O menu **8. Selecionar transporte local ou tunel online** permite trocar essa preferencia.
+
+- **Auto:** prioriza o tunel existente quando o processo esta ativo; caso contrario seleciona **Local** se o runtime MCP completo ja estiver disponivel.
+- **Local:** usa o MCP `stdio` no computador, aproveitando o runtime e o broker socket locais. Nao e acesso remoto por si so.
+- **Existing:** reutiliza o tunel configurado e em execucao no launcher, sem duplicar processo.
+- **Online:** usa o cliente oficial `tunnel-client`. Exige `tunnel_id` existente/criado na OpenAI Platform, credencial de controle no ambiente local e permissao da conta. O assistente executa `init`, `doctor` e `run` apenas nas acoes explicitamente selecionadas, sem gravar API keys.
+
+Em contas/workspaces sem a ferramenta MCP nativa anunciada, a habilidade de integracao pode usar **Remote Desktop Commander** como executor independente: leitura (`read_file`), comando (`start_process`), edicao (`edit_block`), acompanhamento (`interact_with_process`) e imagens autorizadas (`read_file`). O agente precisa descobrir e chamar cada ferramenta real do Commander, confirmar o computador e respeitar as permissoes. Nenhuma chave ou `turn_token` do Codex e transferido para ele.
+
+Este mecanismo permite executar tarefas locais autorizadas por uma via alternativa; nao cria ferramentas `codex_exec` no host que as omitiu e nao elimina as regras da plataforma.
+
+Consulte [Transporte e contingencia](docs/TRANSPORTE-E-CONTINGENCIA.md) para operacao, seguranca e criterios de homologacao.
+
 ## Conectar ao ChatGPT (fluxo oficial de servidor MCP)
 
 O runtime local que anuncia 6/6 ferramentas via `tools/list` nao comprova que elas estejam visiveis no ChatGPT. O pacote local e o plugin de habilidades nao conseguem registrar ou autorizar ferramentas no host por conta propria.
