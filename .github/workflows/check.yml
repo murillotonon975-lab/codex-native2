@@ -40,6 +40,7 @@ jobs:
           if ($failed) { exit 1 }
       - shell: powershell
         run: |
+          $ErrorActionPreference = 'Stop'
           & ./scripts/Configurar-Native2-GUI.ps1 -CheckOnly
           if (-not $?) { exit 1 }
           $result = & ./scripts/Vincular-ChatGPT.ps1 -Json | ConvertFrom-Json
@@ -55,4 +56,6 @@ jobs:
           $online = & ./scripts/Selecionar-Transporte.ps1 -Mode Online -Action Inspect -Json | ConvertFrom-Json
           if ($online.transportConfigured -or $online.tunnelAuthenticated -ne 'not_verified') { throw 'Inspect must be read-only and not claim remote readiness' }
           & ./tests/transport-selection.test.ps1
+          if (-not $?) { throw 'transport-selection.test.ps1 failed' }
           & ./tests/registration-throttle.test.ps1
+          if (-not $?) { throw 'registration-throttle.test.ps1 failed' }
