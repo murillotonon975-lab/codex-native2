@@ -1,5 +1,20 @@
 # Codex Native2
 
+[![Instalador BETA v0.4.1](https://img.shields.io/badge/Instalador-0.4.1%20BETA-orange)](https://github.com/murillotonon975-lab/codex-native2/releases/tag/v0.4.1-beta.1)
+[![Versão main 0.4.0](https://img.shields.io/badge/main-0.4.0%20BETA-blue)](https://github.com/murillotonon975-lab/codex-native2/tree/main)
+[![Plugin ChatGPT 0.5.2](https://img.shields.io/badge/Plugin%20ChatGPT-0.5.2-purple)](https://chatgpt.com/plugins/plugins_6ae37f88da148191bdd9c089a48ece12)
+
+## 📦 Versões e downloads
+
+| Componente | Versão | Situação e download |
+| --- | --- | --- |
+| **Instalador Windows para testes** | **0.4.1 BETA** | **[Releases · Pré-lançamento](https://github.com/murillotonon975-lab/codex-native2/releases/tag/v0.4.1-beta.1)** · [Baixar ZIP](https://github.com/murillotonon975-lab/codex-native2/releases/download/v0.4.1-beta.1/Codex-Native2-v0.4.1.zip) · [SHA-256](https://github.com/murillotonon975-lab/codex-native2/releases/download/v0.4.1-beta.1/SHA256SUMS) |
+| **Código atual da `main`** | **0.4.0 BETA** | [Baixar código atual da main](https://github.com/murillotonon975-lab/codex-native2/archive/refs/heads/main.zip) — ainda não incorpora a PR #3. |
+| **Plugin privado do ChatGPT** | **0.5.2** | [Abrir plugin](https://chatgpt.com/plugins/plugins_6ae37f88da148191bdd9c089a48ece12) — versionamento independente do instalador. |
+
+> **Atenção:** a versão **0.4.1 BETA é uma prévia para homologação**, publicada a partir da [PR #3](https://github.com/murillotonon975-lab/codex-native2/pull/3), que continua aberta em rascunho. Os testes automatizados passaram; instalação real no computador e integração MCP ponta a ponta ainda não foram homologadas. **Não confundir o ZIP da main (0.4.0) com o instalador BETA da página Releases.**
+
+
 > **LEIA PRIMEIRO:** [Ordem exata de execução no Windows](docs/ORDEM-DE-EXECUCAO.md) — qual arquivo abrir, o que cada script faz e quais operações evitar. **Para quem já usa Codex Web GPT**, comece por `Diagnosticar.cmd`; **para a primeira instalação do painel 0.4.0**, execute `Instalar-Native2.cmd` e depois `Iniciar.cmd` da pasta instalada. A interface nova de configuração está em [desenvolvimento na PR #1](https://github.com/murillotonon975-lab/codex-native2/pull/1), não está no ZIP da branch main.
 
 
