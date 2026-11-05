@@ -113,6 +113,8 @@ $report = [ordered]@{
     pluginManifest = Get-PluginManifestStatus -ExpectedId $expectedId -PluginRoot $pluginRoot
     localToolCatalog = $catalog
     tunnelAuthenticated = 'not_verified'
+    chatgptPlanMcpEntitlement = 'not_verified'
+    tunnelWorkspaceAssociation = 'not_verified'
     chatgptCustomMcpRegistered = 'not_verified'
     chatgptToolCatalog = 'not_verified'
     codexExecFromChatGPT = 'not_verified'
@@ -126,6 +128,11 @@ if ($Json) {
 
 Write-Host '=== CODEX NATIVE2 - VINCULACAO MCP COM CHATGPT ===' -ForegroundColor Cyan
 $report.GetEnumerator() | Format-Table Name,Value -AutoSize | Out-Host
+Write-Host ''
+Write-Host 'ELEGIBILIDADE: confirme se o seu plano/workspace permite MCP completo.' -ForegroundColor Yellow
+Write-Host 'Documentacao em 05/11/2026: MCP completo no Business e Enterprise/Edu; Pro read/fetch; Plus sem MCP completo.'
+Write-Host 'Esta instalacao nao habilita permissoes de conta ou workspace.'
+Write-Host 'https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt'
 Write-Host ''
 Write-Host 'Passos oficiais no ChatGPT (revisao manual obrigatoria):'
 Write-Host '1. Deixe Codex Web GPT aberto no modo full e o tunnel-client ativo.'

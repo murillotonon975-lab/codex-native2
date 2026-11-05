@@ -43,5 +43,5 @@ jobs:
           & ./scripts/Configurar-Native2-GUI.ps1 -CheckOnly
           if (-not $?) { exit 1 }
           $result = & ./scripts/Vincular-ChatGPT.ps1 -Json | ConvertFrom-Json
-          if ($result.chatgptToolCatalog -ne 'not_verified' -or $result.codexExecFromChatGPT -ne 'not_verified') { throw 'Remote checks must never be claimed by local preflight' }
+          if ($result.chatgptToolCatalog -ne 'not_verified' -or $result.codexExecFromChatGPT -ne 'not_verified' -or $result.chatgptPlanMcpEntitlement -ne 'not_verified' -or $result.tunnelWorkspaceAssociation -ne 'not_verified') { throw 'Remote checks must never be claimed by local preflight' }
           if (($result | ConvertTo-Json) -match 'tunnel_[a-f0-9]{32}') { throw 'Tunnel ID exposed in output' }

@@ -19,13 +19,17 @@ O menu oferece painel de perfis, configuração do túnel, diagnóstico e este g
 
 O runtime local que anuncia 6/6 ferramentas via `tools/list` nao comprova que elas estejam visiveis no ChatGPT. O pacote local e o plugin de habilidades nao conseguem registrar ou autorizar ferramentas no host por conta propria.
 
+**Antes de instalar ou vincular:** confira a elegibilidade do plano e do workspace. Na documentacao oficial consultada em 05/11/2026, o **MCP completo com ferramentas de execucao** esta disponivel em ChatGPT **Business e Enterprise/Edu** com permissoes adequadas. O plano **Pro** permite conexoes MCP personalizadas com permissoes de leitura/busca (`read/fetch`); o **Plus** nao oferece MCP completo. Portanto, `codex_exec` pode continuar indisponivel mesmo com as seis ferramentas anunciadas localmente. Nenhum instalador, skill ou ZIP muda a permissao da conta. Confira sempre a documentacao oficial, pois as regras de disponibilidade podem mudar.
+
+O script local nao consegue consultar a elegibilidade da conta ChatGPT nem a associacao do tunel ao workspace. Ambos permanecem explicitamente `not_verified` no relatorio; nao interprete isso como erro de autenticacao.
+
 1. Execute `Vincular-ChatGPT.cmd` no menu 7. Ele consulta a instalacao em modo somente leitura, sem imprimir identificadores de tunel, tokens ou credenciais.
 2. No **ChatGPT web**, abra **Plugins → + → Adicionar servidor MCP personalizado** (Add custom MCP server).
 3. Escolha **Conexao: Tunel** (Tunnel), selecione o tunel ja existente da conta/workspace e configure a autenticacao apropriada. Nao recrie o tunel automaticamente.
 4. Confirme o aviso de risco e confira as **seis ferramentas** detectadas na revisao do servidor; entao crie/habilite o plugin de conexao.
 5. Abra uma **nova conversa** com o plugin habilitado, use `codex_tool_inventory` e execute uma leitura inofensiva via `codex_exec`. Somente a resposta real da ferramenta valida a integracao.
 
-Se o tunel nao estiver na lista, confira a associacao ao workspace ChatGPT e as permissoes de tunel `Tunnels Read + Use`. Se as ferramentas nao aparecerem na revisao do servidor, nao continue com a instalacao como se estivesse concluida: investigue autenticação, canal remoto e catalogo. Se a opcao de servidor MCP personalizado nao existir, verifique as politicas da conta/workspace.
+Se a opcao **Adicionar servidor MCP personalizado** nao aparecer ou nao aceitar ferramentas de execucao, verifique primeiro o plano e as permissoes do workspace; esse bloqueio nao e corrigido reinstalando o Windows. Se o tunel nao estiver na lista, confira a associacao ao workspace ChatGPT e as permissoes de tunel `Tunnels Read + Use`. Se as ferramentas nao aparecerem na revisao do servidor, nao continue com a instalacao como se estivesse concluida: investigue autenticação, canal remoto e catalogo. Se a opcao de servidor MCP personalizado nao existir, verifique as politicas da conta/workspace.
 
 O menu 3 (`Configurar-Conexao.cmd`) continua como **modo legado** de geracao de ZIP pessoal para hosts compatíveis. Ele nao substitui o fluxo oficial de adicionar e testar um servidor MCP no ChatGPT e nao deve ser usado para sobrescrever um plugin 0.5.x com um pacote 0.4.x.
 
