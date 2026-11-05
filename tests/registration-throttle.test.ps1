@@ -6,7 +6,9 @@ $root = Join-Path ([IO.Path]::GetTempPath()) ('Native2RateLimit-' + [guid]::NewG
 try {
     $env:USERPROFILE = $root
     $stateDir = Join-Path $root 'local'
-    $script = Join-Path $PSScriptRoot '..\scripts\Controlar-Cadastro-MCP.ps1'
+    # O controlador incluido no ZIP fica na raiz do projeto, junto ao .cmd.
+    $script = Join-Path (Split-Path -Parent $PSScriptRoot) 'Controlar-Cadastro-MCP.ps1'
+    if (-not (Test-Path -LiteralPath $script -PathType Leaf)) { throw 'Controller script missing from project root' }
     $inspection = & $script -Action Inspect -StateRoot $stateDir -Json | ConvertFrom-Json
     if ($inspection.localCooldownActive -or -not $inspection.canSuggestNewAttempt) { throw 'Initial state incorrect' }
     if (Test-Path -LiteralPath $stateDir) { throw 'Inspect must be read-only' }
