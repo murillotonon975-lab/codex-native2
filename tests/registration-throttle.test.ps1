@@ -17,6 +17,11 @@ try {
     if ($limited.cloudConnectionsDeleted -ne 0 -or $limited.hostRequestQuota -ne 'not_available') { throw 'False platform claims' }
     $again = & $script -Action ReportRateLimit -StateRoot $stateDir -Json | ConvertFrom-Json
     if ($again.suggestedWaitSeconds -lt 1780) { throw 'Exponential backoff failed' }
+    # Se o servidor informar espera maior, novas falhas nao podem encurta-la.
+    $long = & $script -Action ReportRateLimit -RetryAfterSeconds 7200 -StateRoot $stateDir -Json | ConvertFrom-Json
+    if ($long.suggestedWaitSeconds -lt 7180) { throw 'Server Retry-After was not respected' }
+    $afterLong = & $script -Action ReportRateLimit -StateRoot $stateDir -Json | ConvertFrom-Json
+    if ($afterLong.suggestedWaitSeconds -lt 7180) { throw 'Repeated limit incorrectly shortened server wait' }
     if (-not (Test-Path -LiteralPath (Join-Path $stateDir 'cadastro-mcp.json.bak'))) { throw 'Backup missing' }
     $text = Get-Content -LiteralPath (Join-Path $stateDir 'cadastro-mcp.json') -Raw
     if ($text -match 'tunnel_[0-9a-f]{32}|sk-[A-Za-z0-9]{24,}') { throw 'Secret in local state' }
