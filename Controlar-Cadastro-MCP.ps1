@@ -50,7 +50,15 @@ if ($Action -eq 'ReportRateLimit') {
     $state.consecutiveLimits = [math]::Min(20, $state.consecutiveLimits + 1)
     $suggested = [int][math]::Min(3600, (900 * [math]::Pow(2, [math]::Min(3, $state.consecutiveLimits - 1))))
     $delay = [int][math]::Max($suggested, $RetryAfterSeconds)
-    $state.nextAttemptUtc = $now.AddSeconds($delay).ToString('o')
+    $nextAttempt = $now.AddSeconds($delay)
+    # Nunca encurtar um prazo ja informado pelo servidor em nova falha.
+    if ($state.nextAttemptUtc) {
+        $previous = [DateTimeOffset]::MinValue
+        if ([DateTimeOffset]::TryParse([string]$state.nextAttemptUtc, [ref]$previous) -and $previous -gt $nextAttempt) {
+            $nextAttempt = $previous
+        }
+    }
+    $state.nextAttemptUtc = $nextAttempt.ToString('o')
     $state.lastError = 'chatgpt_configuration_rate_limit_reported'
     Save-State
 } elseif ($Action -eq 'RecordSuccess') {
