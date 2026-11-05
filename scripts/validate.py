@@ -5,6 +5,7 @@ p=json.loads((root/'plugin.json').read_text(encoding='utf-8-sig'))
 assert p['name']=='codex-native2' and re.fullmatch(r'\d+\.\d+\.\d+',p['version'])
 for name in ['Iniciar.cmd','Configurar-Conexao.ps1','Instalar-Native2.ps1','README.md','painel/index.html','scripts/Verificar-Catalogo-MCP.mjs','tests/mcp-probe.test.mjs','tests/fixtures/mock-mcp.cjs','scripts/Inventariar-Integracoes.mjs','tests/inventory-integrations.test.mjs','scripts/Relatorio-Falhas-GitHub.mjs','tests/failure-report.test.mjs','Inventariar-Integracoes.cmd','Vincular-ChatGPT.cmd','scripts/Vincular-ChatGPT.ps1','Selecionar-Transporte.cmd','scripts/Selecionar-Transporte.ps1','Controlar-Cadastro-MCP.cmd','Controlar-Cadastro-MCP.ps1','tests/registration-throttle.test.ps1','tests/failure-report.test.mjs','tests/transport-selection.test.ps1','tests/check_package_assets.py']:
     assert (root/name).is_file(),name
+assert (root/'Controlar-Cadastro-MCP.ps1').read_bytes()==(root/'scripts/Controlar-Cadastro-MCP.ps1').read_bytes(), 'MCP throttle controller copies diverged'
 assert not (root/'mcp.json').exists(),'Public source must not contain account binding'
 for path in root.rglob('*'):
     if not path.is_file() or any(x in path.parts for x in ['.git','dist','__pycache__']):continue
