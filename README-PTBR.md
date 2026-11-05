@@ -21,6 +21,10 @@ O runtime local que anuncia 6/6 ferramentas via `tools/list` nao comprova que el
 
 **Antes de instalar ou vincular:** confira a elegibilidade do plano e do workspace. Na documentacao oficial consultada em 05/11/2026, o **MCP completo com ferramentas de execucao** esta disponivel em ChatGPT **Business e Enterprise/Edu** com permissoes adequadas. O plano **Pro** permite conexoes MCP personalizadas com permissoes de leitura/busca (`read/fetch`); o **Plus** nao oferece MCP completo. Portanto, `codex_exec` pode continuar indisponivel mesmo com as seis ferramentas anunciadas localmente. Nenhum instalador, skill ou ZIP muda a permissao da conta. Confira sempre a documentacao oficial, pois as regras de disponibilidade podem mudar.
 
+Para o plano **Plus**, o caminho operacional imediato e usar o **Remote Desktop Commander** disponivel no ChatGPT, caso esteja conectado e autorizado. Ele e uma integracao **independente**; nao torna `codex_exec` uma ferramenta da conexao Native2. O fluxo de uso nativo completo continua condicionado a plano e permissao de workspace elegiveis. Evite reinstalacoes repetidas do launcher ou do plugin quando o bloqueio for de elegibilidade da conta.
+
+No PowerShell, o diagnostico pode ser executado com `powershell -NoProfile -File .\\scripts\\Vincular-ChatGPT.ps1 -Json -ChatGPTPlan Plus`. O parametro e uma **declaracao manual** e nunca comprova o plano; o campo `chatgptPlanMcpEntitlement` permanece `not_verified`.
+
 O script local nao consegue consultar a elegibilidade da conta ChatGPT nem a associacao do tunel ao workspace. Ambos permanecem explicitamente `not_verified` no relatorio; nao interprete isso como erro de autenticacao.
 
 1. Execute `Vincular-ChatGPT.cmd` no menu 7. Ele consulta a instalacao em modo somente leitura, sem imprimir identificadores de tunel, tokens ou credenciais.
