@@ -18,7 +18,7 @@ test('windows paths require an actual descendant directory',()=>{
 });
 
 test('only counts and dates are extracted from JSONL',()=>{
-  assert.deepEqual(summarizeRollout(sample),{turns:2,outside:1,unknown:0,errors:1,lastError:'2026-11-04'});
+  assert.deepEqual(summarizeRollout(sample),{turns:2,outside:1,unknown:0,metadataDifferences:0,errors:1,lastError:'2026-11-04'});
   assert.deepEqual(summarizeMultiple([sample]).files,1);
   const issue=buildIssue({
     dateUTC:'2026-11-04',local:{status:'announced',found:6},
@@ -39,10 +39,25 @@ test('missing workspace roots are reported as unknown, not false mismatches',()=
     {type:'turn_context',payload:{cwd:'C:\\\\Private\\\\project'}},
     {type:'turn_context',payload:{cwd:'D:\\\\Code',workspace_roots:[]}},
   ]);
-  assert.deepEqual(summarizeRollout(input),{turns:2,outside:0,unknown:2,errors:0,lastError:null});
+  assert.deepEqual(summarizeRollout(input),{turns:2,outside:0,unknown:2,metadataDifferences:0,errors:0,lastError:null});
   const report=buildIssue({dateUTC:'2026-11-05',local:{status:'announced',found:6},rollouts:summarizeMultiple([input])});
   assert.match(report.body,/Turnos sem raiz verificavel: 2/);
   assert.doesNotMatch(report.body,/Private|D:\\\\Code/);
+});
+
+
+test('session and turn workspace roots are compared without leaking paths or assuming failure',()=>{
+  const input=json([
+    {type:'session_meta',payload:{runtime_workspace_roots:['D:\\Code']}},
+    {type:'turn_context',payload:{cwd:'D:\\Code\\src',workspace_roots:['d:\\CODE']}},
+    {type:'turn_context',payload:{cwd:'C:\\Alt\\project',workspace_roots:['C:\\Alt']}},
+    {type:'turn_context',payload:{cwd:'D:\\Code\\src',workspace_roots:['E:\\Other']}},
+  ]);
+  const report=summarizeRollout(input);
+  assert.deepEqual(report,{turns:3,outside:1,unknown:0,metadataDifferences:2,errors:0,lastError:null});
+  const issue=buildIssue({dateUTC:'2026-11-05',local:{status:'announced',found:6},rollouts:summarizeMultiple([input])});
+  assert.match(issue.body,/Turnos com raizes divergentes entre sessao e turno: 2/);
+  for(const secret of ['D:\\Code','C:\\Alt','E:\\Other'])assert.equal(issue.body.includes(secret),false);
 });
 
 test('local catalog 6 of 6 alone never clears remote verification',()=>{
