@@ -13,9 +13,11 @@ echo 6. Verificar 6 ferramentas nativas do runtime (somente leitura)
 echo 7. Vincular ChatGPT ao tunel MCP oficial (assistente somente leitura)
 echo 8. Selecionar transporte local ou tunel online
 echo 9. Ler guia de instalacao
+echo A. Evitar cadastros MCP duplicados e diagnosticar limite
 echo 0. Sair
-choice /c 1234567890 /n /m "Escolha: "
-if errorlevel 10 exit /b 0
+choice /c 123456789A0 /n /m "Escolha: "
+if errorlevel 11 exit /b 0
+if errorlevel 10 (call "%~dp0Controlar-Cadastro-MCP.cmd" & goto menu)
 if errorlevel 9 (start "" notepad.exe "%~dp0README-PTBR.md" & goto menu)
 if errorlevel 8 (call "%~dp0Selecionar-Transporte.cmd" & goto menu)
 if errorlevel 7 (call "%~dp0Vincular-ChatGPT.cmd" & goto menu)
