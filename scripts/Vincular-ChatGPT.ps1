@@ -3,7 +3,9 @@
 [CmdletBinding()]
 param(
     [switch]$Json,
-    [switch]$NoOpen
+    [switch]$NoOpen,
+    [ValidateSet('Auto','Free','Go','Plus','Pro','Business','Enterprise','Edu')]
+    [string]$ChatGPTPlan = 'Auto'
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -106,6 +108,18 @@ $tunnelClients = @(Get-Process -Name 'tunnel-client' -ErrorAction SilentlyContin
 $catalog = if ($launcher -eq 'ok_full') {
     Get-LocalCatalogStatus -ScriptPath $probe
 } else { 'not_tested_launcher_unavailable' }
+# O plano e informado manualmente: nao existe consulta a entitlement da conta
+# atraves do runtime local. Nunca trate uma selecao como verificacao remota.
+$fullMcpFromReportedPlan = switch ($ChatGPTPlan) {
+    'Plus'       { 'not_available_on_plan' }
+    'Free'       { 'not_available_on_plan' }
+    'Go'         { 'not_available_on_plan' }
+    'Pro'        { 'read_fetch_only' }
+    'Business'   { 'eligible_if_workspace_authorized' }
+    'Enterprise' { 'eligible_if_workspace_authorized' }
+    'Edu'        { 'eligible_if_workspace_authorized' }
+    default      { 'not_verified' }
+}
 $report = [ordered]@{
     launcher = $launcher
     tunnelClientProcess = $(if ($tunnelClients.Count -gt 0) { 'running' } else { 'not_detected' })
@@ -113,6 +127,8 @@ $report = [ordered]@{
     pluginManifest = Get-PluginManifestStatus -ExpectedId $expectedId -PluginRoot $pluginRoot
     localToolCatalog = $catalog
     tunnelAuthenticated = 'not_verified'
+    reportedChatGPTPlan = $ChatGPTPlan
+    fullMcpFromReportedPlan = $fullMcpFromReportedPlan
     chatgptPlanMcpEntitlement = 'not_verified'
     tunnelWorkspaceAssociation = 'not_verified'
     chatgptCustomMcpRegistered = 'not_verified'
@@ -132,6 +148,13 @@ Write-Host ''
 Write-Host 'ELEGIBILIDADE: confirme se o seu plano/workspace permite MCP completo.' -ForegroundColor Yellow
 Write-Host 'Documentacao em 05/11/2026: MCP completo no Business e Enterprise/Edu; Pro read/fetch; Plus sem MCP completo.'
 Write-Host 'Esta instalacao nao habilita permissoes de conta ou workspace.'
+Write-Host 'Use -ChatGPTPlan Plus|Pro|Business|Enterprise|Edu para declarar seu plano no relatorio.'
+Write-Host 'ATENCAO: o plano informado pelo usuario nao equivale a consulta da conta.'
+if ($fullMcpFromReportedPlan -in @('not_available_on_plan','read_fetch_only')) {
+    Write-Host 'Seu plano informado nao permite as seis ferramentas de execucao do Native2 no ChatGPT.' -ForegroundColor Yellow
+    Write-Host 'No ChatGPT, use Remote Desktop Commander como conexao independente se estiver autorizado.'
+    Write-Host 'Nao reinstale nem recrie o tunel para tentar alterar permissoes do ChatGPT.'
+}
 Write-Host 'https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt'
 Write-Host ''
 Write-Host 'Passos oficiais no ChatGPT (revisao manual obrigatoria):'
